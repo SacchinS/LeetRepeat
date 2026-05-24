@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeetRepeat</title>
+  <style>
+    :root {
+      --bg: #1e1e2e;
+      --surface: #181825;
+      --surface2: #313244;
+      --text: #cdd6f4;
+      --subtext: #a6adc8;
+      --muted: #6c7086;
+      --blue: #89b4fa;
+      --green: #a6e3a1;
+      --yellow: #f9e2af;
+      --red: #f38ba8;
+      --mauve: #cba6f7;
+      --border: #45475a;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 400px;
+      min-height: 520px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--blue);
+    }
+    .logo span { font-size: 20px; }
+    .header-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--subtext);
+      padding: 4px 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .icon-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(137,180,250,0.1); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+    }
+    .tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    /* ── Content ── */
+    .content { padding: 16px; }
+
+    /* ── Onboarding state ── */
+    #onboarding-state {
+      text-align: center;
+      padding: 32px 16px;
+    }
+    #onboarding-state h2 { font-size: 18px; margin-bottom: 8px; color: var(--blue); }
+    #onboarding-state p { color: var(--subtext); font-size: 13px; margin-bottom: 16px; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 16px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .stat-value { font-size: 22px; font-weight: 700; color: var(--blue); }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Progress bar ── */
+    .progress-section { margin-bottom: 16px; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--subtext);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--mauve));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Checklist ── */
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .checklist-item:hover { border-color: var(--blue); }
+    .checklist-item.done {
+      opacity: 0.5;
+      background: transparent;
+    }
+    .checklist-item.done .item-title { text-decoration: line-through; }
+    .check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .checklist-item.done .check-circle {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .check-circle::after {
+      content: '';
+      display: none;
+      width: 5px;
+      height: 9px;
+      border: 2px solid var(--surface);
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+    .checklist-item.done .check-circle::after { display: block; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-title {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-meta { display: flex; gap: 6px; align-items: center; margin-top: 2px; }
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-review { background: rgba(137,180,250,0.15); color: var(--blue); }
+    .badge-new { background: rgba(166,227,161,0.15); color: var(--green); }
+    .badge-easy { background: rgba(166,227,161,0.15); color: var(--green); }
+    .badge-medium { background: rgba(249,226,175,0.15); color: var(--yellow); }
+    .badge-hard { background: rgba(243,139,168,0.15); color: var(--red); }
+    .item-link {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .item-link:hover { color: var(--blue); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .empty-state .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+    /* ── Calendar heatmap ── */
+    .calendar-container { margin-bottom: 16px; overflow-x: auto; }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(53, 10px);
+      grid-template-rows: repeat(7, 10px);
+      gap: 2px;
+      min-width: max-content;
+    }
+    .cal-cell {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--surface2);
+    }
+    .cal-cell[data-level="1"] { background: rgba(137,180,250,0.3); }
+    .cal-cell[data-level="2"] { background: rgba(137,180,250,0.55); }
+    .cal-cell[data-level="3"] { background: rgba(137,180,250,0.8); }
+    .cal-cell[data-level="4"] { background: var(--blue); }
+
+    /* ── Weak areas ── */
+    .weak-area-list { display: flex; flex-direction: column; gap: 6px; }
+    .weak-area-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .weak-area-bar-track {
+      flex: 1;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 99px;
+    }
+    .weak-area-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+    .weak-area-name { font-size: 13px; min-width: 140px; }
+    .weak-area-count { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+
+    /* ── Settings ── */
+    .settings-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--subtext);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-group input[type="number"],
+    .form-group input[type="range"] {
+      width: 100%;
+    }
+    .form-group input[type="number"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .form-group input[type="number"]:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    .range-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--subtext);
+      margin-top: 4px;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 99px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--blue);
+      cursor: pointer;
+    }
+    .save-btn {
+      background: var(--blue);
+      color: var(--surface);
+      border: none;
+      border-radius: var(--radius);
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.15s;
+    }
+    .save-btn:hover { filter: brightness(1.1); }
+
+    /* ── Hidden ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <span>🧠</span> LeetRepeat
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="open-leetcode-btn" title="Open LeetCode">↗</button>
+    </div>
+  </div>
+
+  <!-- Onboarding / loading state -->
+  <div id="onboarding-state" class="hidden">
+    <h2>Setting up your deck…</h2>
+    <p>Importing your LeetCode solve history. This may take a moment.</p>
+    <div class="spinner"></div>
+    <p id="onboarding-status" style="color:var(--subtext);font-size:12px;"></p>
+  </div>
+
+  <!-- Not signed in state -->
+  <div id="not-signed-in" class="hidden">
+    <div style="padding:32px 16px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">👤</div>
+      <h2 style="margin-bottom:8px;">Sign in to LeetCode</h2>
+      <p style="color:var(--subtext);font-size:13px;margin-bottom:16px;">
+        LeetRepeat needs your LeetCode session to import your solve history.
+      </p>
+      <a href="https://leetcode.com/accounts/login/" target="_blank"
+         style="color:var(--blue);font-size:14px;font-weight:600;">
+        Go to LeetCode →
+      </a>
+    </div>
+  </div>
+
+  <!-- Main UI (hidden until ready) -->
+  <div id="main-ui" class="hidden">
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="today">Today</button>
+      <button class="tab" data-tab="calendar">Calendar</button>
+      <button class="tab" data-tab="weak">Weak Areas</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- ── Today Tab ── -->
+    <div class="content" id="tab-today">
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-done">0</div>
+          <div class="stat-label">Done today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-remaining">0</div>
+          <div class="stat-label">Remaining</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-due">0</div>
+          <div class="stat-label">Cards due</div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-section">
+        <div class="progress-label">
+          <span>Daily progress</span>
+          <span id="progress-text">0 / 0</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div class="section-title">Today's Queue</div>
+      <ul class="checklist" id="checklist"></ul>
+      <div class="empty-state hidden" id="checklist-empty">
+        <div class="empty-icon">🎉</div>
+        All done for today! Come back tomorrow.
+      </div>
+
+    </div>
+
+    <!-- ── Calendar Tab ── -->
+    <div class="content hidden" id="tab-calendar">
+      <div class="section-title" style="margin-bottom:12px;">Solve activity (past year)</div>
+      <div class="calendar-container">
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:11px;color:var(--muted);">
+        <span>Less</span>
+        <div style="width:10px;height:10px;border-radius:2px;background:var(--surface2)"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(137,180,250,0.3)"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(137,180,250,0.55)"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:rgba(137,180,250,0.8)"></div>
+        <div style="width:10px;height:10px;border-radius:2px;background:var(--blue)"></div>
+        <span>More</span>
+      </div>
+    </div>
+
+    <!-- ── Weak Areas Tab ── -->
+    <div class="content hidden" id="tab-weak">
+      <div class="section-title" style="margin-bottom:12px;">Topics by difficulty</div>
+      <div class="weak-area-list" id="weak-area-list"></div>
+      <div class="empty-state hidden" id="weak-area-empty">
+        <div class="empty-icon">📊</div>
+        Solve some problems to see your weak areas.
+      </div>
+    </div>
+
+    <!-- ── Settings Tab ── -->
+    <div class="content hidden" id="tab-settings">
+      <form class="settings-form" id="settings-form">
+        <div class="form-group">
+          <label for="daily-target">Daily target (problems)</label>
+          <input type="number" id="daily-target" min="1" max="50" value="5" />
+        </div>
+        <div class="form-group">
+          <label for="blend-ratio">Review vs. New blend</label>
+          <input type="range" id="blend-ratio" min="0" max="100" step="5" value="60" />
+          <div class="range-display">
+            <span id="blend-reviews-label">60% reviews</span>
+            <span id="blend-new-label">40% new</span>
+          </div>
+        </div>
+        <div style="padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--subtext);">
+          With target <strong id="settings-preview-target" style="color:var(--text)">5</strong>:
+          <strong id="settings-preview-reviews" style="color:var(--blue)">3</strong> reviews +
+          <strong id="settings-preview-new" style="color:var(--green)">2</strong> new per day
+        </div>
+        <button type="submit" class="save-btn">Save Settings</button>
+        <div id="settings-saved" class="hidden" style="text-align:center;color:var(--green);font-size:13px;">
+          ✓ Settings saved
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
