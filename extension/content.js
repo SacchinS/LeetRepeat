@@ -411,44 +411,72 @@
   // ─── Manual override button ──────────────────────────────────────────────────
 
   function injectManualButton() {
-    // Don't inject twice
     if (document.getElementById('leetrepeat-manual-btn')) return;
 
     const btn = document.createElement('button');
     btn.id = 'leetrepeat-manual-btn';
-    btn.textContent = '⟳ LeetRepeat';
-    btn.title = 'Manually rate this problem for spaced repetition';
+    btn.title = 'Auto-detection missed your solve? Rate it manually.';
+
+    // Lucide pencil-line icon
+    const pencilSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+
+    btn.innerHTML = `${pencilSvg} Rate solve`;
     btn.style.cssText = `
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 99999;
-      background: #2563eb;
-      color: white;
-      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #131621;
+      color: #8890b5;
+      border: 1px solid #252840;
       border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 13px;
+      padding: 7px 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      transition: background 0.2s;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      letter-spacing: 0.01em;
     `;
-    btn.addEventListener('mouseenter', () => btn.style.background = '#1d4ed8');
-    btn.addEventListener('mouseleave', () => btn.style.background = '#2563eb');
+    btn.addEventListener('mouseenter', () => {
+      btn.style.borderColor = '#6b8cfa';
+      btn.style.color = '#6b8cfa';
+      btn.style.background = 'rgba(107,140,250,0.08)';
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.borderColor = '#252840';
+      btn.style.color = '#8890b5';
+      btn.style.background = '#131621';
+    });
     btn.addEventListener('click', () => {
-      ratingModalShown = false; // allow re-show
-      showRatingModal(currentProblemSlug);
+      ratingModalShown = false;
+      showRatingModal(currentProblemSlug, /* isManual */ true);
     });
 
     document.body.appendChild(btn);
   }
 
-  // ─── Rating modal ────────────────────────────────────────────────────────────
+  // ─── Rating modal ─────────────────────────────────────────────────────────────
+  // isManual = true when triggered by the "Rate solve" button (not auto-detected)
 
-  function showRatingModal(titleSlug) {
+  function showRatingModal(titleSlug, isManual = false) {
     if (document.getElementById('leetrepeat-modal')) return;
+
+    // ── Inline Lucide SVG helpers ───────────────────────────────────────────
+    const svg = (paths, size = 16, color = 'currentColor') =>
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+
+    const ICONS = {
+      repeat:    `<path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/>`,
+      check:     `<path d="M20 6 9 17l-5-5"/>`,
+      minus:     `<path d="M5 12h14"/>`,
+      xmark:     `<path d="M18 6 6 18"/><path d="m6 6 12 12"/>`,
+      alertTri:  `<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>`,
+    };
 
     const overlay = document.createElement('div');
     overlay.id = 'leetrepeat-modal-overlay';
@@ -456,76 +484,160 @@
       position: fixed;
       inset: 0;
       z-index: 1000000;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.65);
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: lr-fade-in 0.2s ease;
+      backdrop-filter: blur(2px);
+      animation: lr-fade 0.18s ease;
     `;
 
     const modal = document.createElement('div');
     modal.id = 'leetrepeat-modal';
     modal.style.cssText = `
-      background: #1e1e2e;
-      border: 1px solid #313244;
+      background: #0c0e17;
+      border: 1px solid #252840;
       border-radius: 16px;
-      padding: 32px 40px;
+      padding: 28px 32px 24px;
       text-align: center;
-      width: 360px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #cdd6f4;
-      animation: lr-slide-up 0.25s ease;
+      width: 340px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #e6e9f4;
+      animation: lr-up 0.22s cubic-bezier(0.34,1.56,0.64,1);
     `;
+
+    // Manual override warning banner
+    const warningBanner = isManual ? `
+      <div style="
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        background:rgba(251,146,60,0.10);
+        border:1px solid rgba(251,146,60,0.25);
+        border-radius:99px;
+        padding:4px 12px 4px 8px;
+        margin-bottom:18px;
+        font-size:11px;
+        font-weight:700;
+        color:#fb923c;
+        letter-spacing:0.04em;
+        text-transform:uppercase;
+      ">
+        ${svg(ICONS.alertTri, 12, '#fb923c')} Manual override
+      </div>
+    ` : '';
+
+    const titleText   = isManual ? 'Rate this problem' : 'How did that feel?';
+    const subtitleText = isManual
+      ? 'Only use this if you <strong>just solved it</strong> and auto-detection missed the submission.'
+      : 'Your rating sets the next review date — be honest.';
 
     modal.innerHTML = `
       <style>
-        @keyframes lr-fade-in { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes lr-slide-up { from { transform: translateY(20px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-        .lr-btn {
-          border: none;
-          border-radius: 10px;
-          padding: 12px 20px;
-          font-size: 15px;
+        @keyframes lr-fade { from { opacity:0 } to { opacity:1 } }
+        @keyframes lr-up   { from { transform:translateY(16px) scale(0.97); opacity:0 } to { transform:none; opacity:1 } }
+
+        .lr-rating-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 7px;
+          background: #131621;
+          border: 1px solid #252840;
+          border-radius: 12px;
+          padding: 14px 10px 12px;
+          font-size: 12px;
           font-weight: 700;
           cursor: pointer;
-          transition: transform 0.1s, filter 0.1s;
-          min-width: 90px;
+          transition: border-color 0.15s, background 0.15s, transform 0.1s;
+          flex: 1;
           font-family: inherit;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
         }
-        .lr-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
-        .lr-btn:active { transform: scale(0.97); }
+        .lr-rating-btn:hover  { transform: translateY(-2px); }
+        .lr-rating-btn:active { transform: scale(0.97); }
+
+        .lr-rating-btn[data-rating="Easy"]   { color: #4ade94; }
+        .lr-rating-btn[data-rating="Easy"]:hover   { border-color: #4ade94; background: rgba(74,222,148,0.08); }
+
+        .lr-rating-btn[data-rating="Medium"] { color: #f5c542; }
+        .lr-rating-btn[data-rating="Medium"]:hover { border-color: #f5c542; background: rgba(245,197,66,0.08); }
+
+        .lr-rating-btn[data-rating="Hard"]   { color: #f47474; }
+        .lr-rating-btn[data-rating="Hard"]:hover   { border-color: #f47474; background: rgba(244,116,116,0.08); }
+
+        .lr-icon-wrap {
+          width: 36px; height: 36px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .lr-rating-btn[data-rating="Easy"]   .lr-icon-wrap { background: rgba(74,222,148,0.12); }
+        .lr-rating-btn[data-rating="Medium"] .lr-icon-wrap { background: rgba(245,197,66,0.12); }
+        .lr-rating-btn[data-rating="Hard"]   .lr-icon-wrap { background: rgba(244,116,116,0.12); }
+
+        #lr-skip-btn {
+          background: none;
+          border: none;
+          color: #4c5278;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          font-family: inherit;
+          padding: 6px 12px;
+          border-radius: 6px;
+          transition: color 0.15s;
+        }
+        #lr-skip-btn:hover { color: #8890b5; }
       </style>
-      <div style="font-size:28px;margin-bottom:8px;">🧠</div>
-      <div style="font-size:20px;font-weight:700;margin-bottom:6px;">How was it?</div>
-      <div style="font-size:13px;color:#a6adc8;margin-bottom:28px;">Rate your solve to update your review schedule</div>
-      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px;">
-        <button class="lr-btn" data-rating="Easy" style="background:#a6e3a1;color:#1e1e2e;">
-          😊 Easy
+
+      ${warningBanner}
+
+      <div style="
+        width:40px; height:40px;
+        background:rgba(107,140,250,0.10);
+        border:1px solid rgba(107,140,250,0.20);
+        border-radius:10px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#6b8cfa;
+        margin:0 auto 14px;
+      ">
+        ${svg(ICONS.repeat, 20, '#6b8cfa')}
+      </div>
+
+      <div style="font-size:18px;font-weight:700;letter-spacing:-0.02em;margin-bottom:6px;">
+        ${titleText}
+      </div>
+      <div style="font-size:12.5px;color:#8890b5;line-height:1.55;margin-bottom:24px;">
+        ${subtitleText}
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:18px;">
+        <button class="lr-rating-btn" data-rating="Easy">
+          <div class="lr-icon-wrap">${svg(ICONS.check, 18, '#4ade94')}</div>
+          Easy
         </button>
-        <button class="lr-btn" data-rating="Medium" style="background:#f9e2af;color:#1e1e2e;">
-          😤 Medium
+        <button class="lr-rating-btn" data-rating="Medium">
+          <div class="lr-icon-wrap">${svg(ICONS.minus, 18, '#f5c542')}</div>
+          Medium
         </button>
-        <button class="lr-btn" data-rating="Hard" style="background:#f38ba8;color:#1e1e2e;">
-          💀 Hard
+        <button class="lr-rating-btn" data-rating="Hard">
+          <div class="lr-icon-wrap">${svg(ICONS.xmark, 18, '#f47474')}</div>
+          Hard
         </button>
       </div>
-      <button id="lr-skip-btn" style="
-        background:transparent;
-        border:1px solid #45475a;
-        color:#6c7086;
-        border-radius:8px;
-        padding:6px 16px;
-        font-size:12px;
-        cursor:pointer;
-        font-family:inherit;
-      ">Skip</button>
+
+      <button id="lr-skip-btn">Skip for now</button>
     `;
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    // Button handlers
     modal.querySelectorAll('[data-rating]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const rating = btn.getAttribute('data-rating');
@@ -541,7 +653,6 @@
       ratingModalShown = false;
     });
 
-    // Close on overlay click
     overlay.addEventListener('click', e => {
       if (e.target === overlay) {
         overlay.remove();
@@ -551,26 +662,38 @@
   }
 
   function showConfirmToast(rating) {
-    const emojiMap = { Easy: '😊', Medium: '😤', Hard: '💀' };
-    const colorMap = { Easy: '#a6e3a1', Medium: '#f9e2af', Hard: '#f38ba8' };
+    const svg = paths =>
+      `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+
+    const config = {
+      Easy:   { bg: 'rgba(74,222,148,0.12)',  border: 'rgba(74,222,148,0.25)',  color: '#4ade94', icon: svg('<path d="M20 6 9 17l-5-5"/>') },
+      Medium: { bg: 'rgba(245,197,66,0.12)',  border: 'rgba(245,197,66,0.25)',  color: '#f5c542', icon: svg('<path d="M5 12h14"/>') },
+      Hard:   { bg: 'rgba(244,116,116,0.12)', border: 'rgba(244,116,116,0.25)', color: '#f47474', icon: svg('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>') },
+    };
+    const c = config[rating];
 
     const toast = document.createElement('div');
     toast.style.cssText = `
       position: fixed;
-      bottom: 80px;
+      bottom: 60px;
       right: 20px;
       z-index: 999999;
-      background: ${colorMap[rating]};
-      color: #1e1e2e;
-      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      color: ${c.color};
+      padding: 9px 16px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      animation: lr-fade-in 0.2s ease;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      animation: lr-fade 0.2s ease;
+      letter-spacing: 0.01em;
     `;
-    toast.textContent = `${emojiMap[rating]} Rated ${rating} — schedule updated!`;
+    toast.innerHTML = `${c.icon} Rated <strong>${rating}</strong> — schedule updated`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
   }
