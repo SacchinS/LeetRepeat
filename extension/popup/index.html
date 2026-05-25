@@ -6,135 +6,288 @@
   <title>LeetRepeat</title>
   <style>
     :root {
-      --bg: #1e1e2e;
-      --surface: #181825;
-      --surface2: #313244;
-      --text: #cdd6f4;
-      --subtext: #a6adc8;
-      --muted: #6c7086;
-      --blue: #89b4fa;
-      --green: #a6e3a1;
-      --yellow: #f9e2af;
-      --red: #f38ba8;
-      --mauve: #cba6f7;
-      --border: #45475a;
-      --radius: 10px;
-      --radius-sm: 6px;
+      --bg:       #1e1e2e;
+      --mantle:   #181825;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --surface2: #585b70;
+      --text:     #cdd6f4;
+      --sub1:     #bac2de;
+      --sub0:     #a6adc8;
+      --muted:    #6c7086;
+      --blue:     #89b4fa;
+      --green:    #a6e3a1;
+      --yellow:   #f9e2af;
+      --red:      #f38ba8;
+      --mauve:    #cba6f7;
+      --teal:     #94e2d5;
+      --peach:    #fab387;
+      --r:  10px;
+      --r-sm: 6px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      width: 400px;
-      min-height: 520px;
+      width: 440px;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
-    /* ── Header ── */
+    /* ── Scrollable content areas ──────────────────────────────────────── */
+    .scroll-area {
+      max-height: 380px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--surface1) transparent;
+    }
+    .scroll-area::-webkit-scrollbar { width: 4px; }
+    .scroll-area::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 99px; }
+
+    /* ── Hidden ────────────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       ONBOARDING
+    ══════════════════════════════════════════════════════════════════════ */
+    #onboarding-screen {
+      padding: 40px 32px 36px;
+      text-align: center;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+    .ob-icon { font-size: 52px; margin-bottom: 16px; }
+    .ob-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .ob-sub {
+      font-size: 13px;
+      color: var(--sub0);
+      margin-bottom: 28px;
+      line-height: 1.6;
+      max-width: 300px;
+    }
+    .ob-steps {
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      text-align: left;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+    .ob-steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--sub0);
+      font-size: 12px;
+      padding: 3px 0;
+    }
+    .ob-steps li + li { border-top: 1px solid var(--surface0); margin-top: 6px; padding-top: 9px; }
+    .ob-step-num {
+      background: var(--blue);
+      color: var(--mantle);
+      font-weight: 700;
+      font-size: 10px;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: var(--blue);
+      color: var(--mantle);
+      border: none;
+      border-radius: var(--r);
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.15s, transform 0.1s;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--surface1);
+      border-radius: var(--r);
+      color: var(--muted);
+      padding: 8px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--sub0); color: var(--sub0); }
+
+    /* Onboarding progress state */
+    #ob-progress { margin-top: 16px; width: 100%; }
+    .ob-progress-bar {
+      height: 4px;
+      background: var(--surface0);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .ob-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--mauve));
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+      animation: ob-pulse 2s ease-in-out infinite;
+    }
+    @keyframes ob-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .ob-progress-text { font-size: 12px; color: var(--sub0); text-align: center; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       MAIN UI
+    ══════════════════════════════════════════════════════════════════════ */
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px 12px;
-      border-bottom: 1px solid var(--border);
+      padding: 13px 16px 12px;
+      border-bottom: 1px solid var(--surface0);
     }
     .logo {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 15px;
       color: var(--blue);
+      letter-spacing: -0.01em;
     }
-    .logo span { font-size: 20px; }
-    .header-actions { display: flex; gap: 8px; }
-    .icon-btn {
+    .logo-icon { font-size: 18px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .username-chip {
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: 99px;
+      padding: 3px 10px;
+    }
+    .header-btn {
       background: none;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--subtext);
-      padding: 4px 8px;
-      font-size: 13px;
+      border: 1px solid var(--surface0);
+      border-radius: var(--r-sm);
+      color: var(--muted);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
+      font-size: 13px;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
-    .icon-btn:hover { border-color: var(--blue); color: var(--blue); }
-    .icon-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(137,180,250,0.1); }
+    .header-btn:hover { border-color: var(--blue); color: var(--blue); background: rgba(137,180,250,0.08); }
 
-    /* ── Tabs ── */
+    /* ── Tabs ────────────────────────────────────────────────────────────── */
     .tabs {
       display: flex;
-      border-bottom: 1px solid var(--border);
       padding: 0 16px;
+      border-bottom: 1px solid var(--surface0);
+      gap: 2px;
     }
     .tab {
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
       color: var(--muted);
-      padding: 10px 12px;
-      font-size: 13px;
-      font-weight: 500;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
       margin-bottom: -1px;
+      letter-spacing: 0.01em;
+      font-family: inherit;
     }
-    .tab:hover { color: var(--text); }
+    .tab:hover { color: var(--sub0); }
     .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
-    /* ── Content ── */
-    .content { padding: 16px; }
+    /* ── Tab panels ──────────────────────────────────────────────────────── */
+    .tab-panel { padding: 14px 14px 16px; }
 
-    /* ── Onboarding state ── */
-    #onboarding-state {
-      text-align: center;
-      padding: 32px 16px;
-    }
-    #onboarding-state h2 { font-size: 18px; margin-bottom: 8px; color: var(--blue); }
-    #onboarding-state p { color: var(--subtext); font-size: 13px; margin-bottom: 16px; }
-    .spinner {
-      width: 32px; height: 32px;
-      border: 3px solid var(--border);
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 16px auto;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Stats row ── */
+    /* ── Stats row ───────────────────────────────────────────────────────── */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 12px;
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: var(--r);
+      padding: 10px 10px 8px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-    .stat-value { font-size: 22px; font-weight: 700; color: var(--blue); }
-    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card.done::before  { background: var(--green); }
+    .stat-card.left::before  { background: var(--blue); }
+    .stat-card.due::before   { background: var(--peach); }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 3px;
+      letter-spacing: -0.02em;
+    }
+    .stat-card.done  .stat-value { color: var(--green); }
+    .stat-card.left  .stat-value { color: var(--blue); }
+    .stat-card.due   .stat-value { color: var(--peach); }
+    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 
-    /* ── Progress bar ── */
-    .progress-section { margin-bottom: 16px; }
-    .progress-label {
+    /* ── Progress bar ────────────────────────────────────────────────────── */
+    .progress-wrap { margin-bottom: 14px; }
+    .progress-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      color: var(--subtext);
+      font-size: 11px;
+      color: var(--muted);
       margin-bottom: 6px;
     }
     .progress-bar {
-      height: 6px;
-      background: var(--surface2);
+      height: 5px;
+      background: var(--surface0);
       border-radius: 99px;
       overflow: hidden;
     }
@@ -142,103 +295,145 @@
       height: 100%;
       background: linear-gradient(90deg, var(--blue), var(--mauve));
       border-radius: 99px;
-      transition: width 0.4s ease;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    .progress-fill.complete { background: linear-gradient(90deg, var(--green), var(--teal)); }
 
-    /* ── Checklist ── */
-    .section-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-    .checklist { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-    .checklist-item {
+    /* ── Problem list section label ──────────────────────────────────────── */
+    .section-label {
       display: flex;
       align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+    .section-label-line {
+      flex: 1;
+      height: 1px;
+      background: var(--surface0);
+    }
+
+    /* ── Problem cards ───────────────────────────────────────────────────── */
+    .problem-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .problem-card {
+      display: grid;
+      grid-template-columns: 20px 1fr auto;
+      align-items: center;
       gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 8px 12px;
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-left: 3px solid var(--surface1);
+      border-radius: var(--r);
+      padding: 9px 10px 9px 10px;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      text-decoration: none;
     }
-    .checklist-item:hover { border-color: var(--blue); }
-    .checklist-item.done {
-      opacity: 0.5;
-      background: transparent;
+    .problem-card:hover { border-color: var(--blue); border-left-color: var(--blue); background: rgba(137,180,250,0.04); }
+    .problem-card:active { transform: scale(0.995); }
+    .problem-card.done {
+      opacity: 0.45;
+      pointer-events: none;
     }
-    .checklist-item.done .item-title { text-decoration: line-through; }
-    .check-circle {
+    .problem-card[data-diff="Easy"]   { border-left-color: var(--green); }
+    .problem-card[data-diff="Medium"] { border-left-color: var(--yellow); }
+    .problem-card[data-diff="Hard"]   { border-left-color: var(--red); }
+    .problem-card.done { border-left-color: var(--surface1) !important; }
+
+    /* Checkbox */
+    .card-check {
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      border: 2px solid var(--border);
-      flex-shrink: 0;
+      border: 2px solid var(--surface1);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+      pointer-events: all;
     }
-    .checklist-item.done .check-circle {
+    .problem-card.done .card-check {
       background: var(--green);
       border-color: var(--green);
     }
-    .check-circle::after {
-      content: '';
-      display: none;
-      width: 5px;
-      height: 9px;
-      border: 2px solid var(--surface);
-      border-top: none;
-      border-left: none;
-      transform: rotate(45deg) translate(-1px, -1px);
-    }
-    .checklist-item.done .check-circle::after { display: block; }
-    .item-info { flex: 1; min-width: 0; }
-    .item-title {
+    .card-check-icon { display: none; font-size: 9px; color: var(--mantle); font-weight: 900; }
+    .problem-card.done .card-check-icon { display: block; }
+
+    /* Card body */
+    .card-body { min-width: 0; }
+    .card-title {
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 3px;
+      display: block;
     }
-    .item-meta { display: flex; gap: 6px; align-items: center; margin-top: 2px; }
-    .badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 1px 6px;
-      border-radius: 99px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-    .badge-review { background: rgba(137,180,250,0.15); color: var(--blue); }
-    .badge-new { background: rgba(166,227,161,0.15); color: var(--green); }
-    .badge-easy { background: rgba(166,227,161,0.15); color: var(--green); }
-    .badge-medium { background: rgba(249,226,175,0.15); color: var(--yellow); }
-    .badge-hard { background: rgba(243,139,168,0.15); color: var(--red); }
-    .item-link {
-      font-size: 11px;
-      color: var(--muted);
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-    .item-link:hover { color: var(--blue); }
+    .problem-card.done .card-title { text-decoration: line-through; color: var(--muted); }
+    .card-tags { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
 
-    /* ── Empty state ── */
+    /* Pill badges */
+    .pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 99px;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+    .pill-review  { background: rgba(137,180,250,0.12); color: var(--blue); }
+    .pill-new     { background: rgba(166,227,161,0.12); color: var(--green); }
+    .pill-easy    { background: rgba(166,227,161,0.12); color: var(--green); }
+    .pill-medium  { background: rgba(249,226,175,0.12); color: var(--yellow); }
+    .pill-hard    { background: rgba(243,139,168,0.12); color: var(--red); }
+    .pill-overdue { background: rgba(250,179,135,0.12); color: var(--peach); }
+
+    /* Card action: external link icon */
+    .card-link {
+      font-size: 13px;
+      color: var(--surface1);
+      flex-shrink: 0;
+      transition: color 0.15s;
+      line-height: 1;
+      padding-left: 4px;
+    }
+    .problem-card:hover .card-link { color: var(--muted); }
+
+    /* ── Empty / done states ──────────────────────────────────────────────── */
     .empty-state {
       text-align: center;
-      padding: 24px;
+      padding: 32px 20px;
       color: var(--muted);
-      font-size: 13px;
     }
-    .empty-state .empty-icon { font-size: 32px; margin-bottom: 8px; }
+    .empty-icon { font-size: 36px; margin-bottom: 10px; }
+    .empty-title { font-size: 15px; font-weight: 600; color: var(--sub0); margin-bottom: 4px; }
+    .empty-sub { font-size: 12px; color: var(--muted); }
 
-    /* ── Calendar heatmap ── */
-    .calendar-container { margin-bottom: 16px; overflow-x: auto; }
+    /* ══════════════════════════════════════════════════════════════════════
+       CALENDAR TAB
+    ══════════════════════════════════════════════════════════════════════ */
+    .calendar-section { margin-bottom: 12px; }
+    .calendar-months {
+      display: grid;
+      grid-template-columns: repeat(53, 10px);
+      margin-bottom: 3px;
+      min-width: max-content;
+    }
+    .cal-month-label {
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(53, 10px);
@@ -250,140 +445,288 @@
       width: 10px;
       height: 10px;
       border-radius: 2px;
-      background: var(--surface2);
+      background: var(--surface0);
+      cursor: default;
+      transition: transform 0.1s;
     }
-    .cal-cell[data-level="1"] { background: rgba(137,180,250,0.3); }
-    .cal-cell[data-level="2"] { background: rgba(137,180,250,0.55); }
-    .cal-cell[data-level="3"] { background: rgba(137,180,250,0.8); }
+    .cal-cell:hover { transform: scale(1.4); z-index: 1; }
+    .cal-cell[data-level="1"] { background: rgba(137,180,250,0.25); }
+    .cal-cell[data-level="2"] { background: rgba(137,180,250,0.50); }
+    .cal-cell[data-level="3"] { background: rgba(137,180,250,0.75); }
     .cal-cell[data-level="4"] { background: var(--blue); }
+    .cal-cell.today-cell { outline: 1px solid var(--blue); outline-offset: 1px; }
 
-    /* ── Weak areas ── */
-    .weak-area-list { display: flex; flex-direction: column; gap: 6px; }
-    .weak-area-item {
+    .cal-legend {
       display: flex;
+      gap: 5px;
       align-items: center;
-      gap: 10px;
-      padding: 6px 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      margin-top: 8px;
+      font-size: 10px;
+      color: var(--muted);
     }
-    .weak-area-bar-track {
-      flex: 1;
+    .cal-legend-swatch {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+    }
+
+    .cal-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .cal-stat {
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: var(--r);
+      padding: 10px 12px;
+    }
+    .cal-stat-value { font-size: 20px; font-weight: 800; color: var(--blue); letter-spacing: -0.02em; }
+    .cal-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 2px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       WEAK AREAS TAB
+    ══════════════════════════════════════════════════════════════════════ */
+    .weak-list { display: flex; flex-direction: column; gap: 6px; }
+    .weak-item {
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: var(--r);
+      padding: 9px 12px;
+    }
+    .weak-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .weak-tag { font-size: 12px; font-weight: 600; color: var(--text); }
+    .weak-meta { font-size: 11px; color: var(--muted); }
+    .weak-bar-track {
       height: 4px;
-      background: var(--surface2);
+      background: var(--surface0);
       border-radius: 99px;
+      overflow: hidden;
     }
-    .weak-area-bar-fill {
+    .weak-bar-fill {
       height: 100%;
       border-radius: 99px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .weak-area-name { font-size: 13px; min-width: 140px; }
-    .weak-area-count { font-size: 11px; color: var(--muted); flex-shrink: 0; }
 
-    /* ── Settings ── */
-    .settings-form { display: flex; flex-direction: column; gap: 16px; }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--subtext);
-      margin-bottom: 6px;
+    /* ══════════════════════════════════════════════════════════════════════
+       SETTINGS TAB
+    ══════════════════════════════════════════════════════════════════════ */
+    .settings-form { display: flex; flex-direction: column; gap: 18px; }
+    .form-field { display: flex; flex-direction: column; gap: 8px; }
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub0);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
     }
-    .form-group input[type="number"],
-    .form-group input[type="range"] {
-      width: 100%;
+    .form-desc { font-size: 11px; color: var(--muted); margin-top: -4px; }
+
+    /* Number stepper */
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: var(--r);
+      overflow: hidden;
+      width: fit-content;
     }
-    .form-group input[type="number"] {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+    .stepper-btn {
+      background: none;
+      border: none;
+      color: var(--sub0);
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stepper-btn:hover { background: var(--surface0); color: var(--text); }
+    .stepper-val {
+      width: 52px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
       color: var(--text);
-      padding: 8px 10px;
-      font-size: 14px;
+      background: none;
+      border: none;
+      border-left: 1px solid var(--surface0);
+      border-right: 1px solid var(--surface0);
+      padding: 0;
+      height: 36px;
+      font-family: inherit;
     }
-    .form-group input[type="number"]:focus {
-      outline: none;
-      border-color: var(--blue);
-    }
-    .range-display {
+    .stepper-val:focus { outline: none; }
+
+    /* Blend slider */
+    .blend-widget { display: flex; flex-direction: column; gap: 8px; }
+    .blend-labels {
       display: flex;
       justify-content: space-between;
       font-size: 12px;
-      color: var(--subtext);
-      margin-top: 4px;
     }
+    .blend-review-label { color: var(--blue); font-weight: 600; }
+    .blend-new-label    { color: var(--green); font-weight: 600; }
     input[type="range"] {
       -webkit-appearance: none;
-      height: 4px;
-      background: var(--surface2);
+      width: 100%;
+      height: 5px;
+      background: var(--surface0);
       border-radius: 99px;
       outline: none;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: var(--blue);
       cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(137,180,250,0.2);
     }
+    .blend-preview {
+      display: flex;
+      height: 28px;
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      border: 1px solid var(--surface0);
+    }
+    .blend-preview-review {
+      background: rgba(137,180,250,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue);
+      transition: width 0.3s ease;
+    }
+    .blend-preview-new {
+      background: rgba(166,227,161,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      transition: width 0.3s ease;
+      flex: 1;
+    }
+
     .save-btn {
       background: var(--blue);
-      color: var(--surface);
+      color: var(--mantle);
       border: none;
-      border-radius: var(--radius);
-      padding: 10px;
+      border-radius: var(--r);
+      padding: 11px;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      transition: filter 0.15s;
+      font-family: inherit;
+      transition: filter 0.15s, transform 0.1s;
     }
     .save-btn:hover { filter: brightness(1.1); }
+    .save-btn:active { transform: scale(0.98); }
+    .save-confirm {
+      text-align: center;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 600;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-    /* ── Hidden ── */
-    .hidden { display: none !important; }
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--surface0);
+      margin: 2px 0;
+    }
+
+    /* Reset link */
+    .danger-zone {
+      border-top: 1px solid var(--surface0);
+      padding-top: 14px;
+      margin-top: 4px;
+    }
+    .danger-btn {
+      background: none;
+      border: 1px solid rgba(243,139,168,0.3);
+      border-radius: var(--r-sm);
+      color: var(--red);
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      opacity: 0.7;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .danger-btn:hover { opacity: 1; border-color: var(--red); }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">
-      <span>🧠</span> LeetRepeat
-    </div>
-    <div class="header-actions">
-      <button class="icon-btn" id="open-leetcode-btn" title="Open LeetCode">↗</button>
+  <!-- ══ ONBOARDING ══════════════════════════════════════════════════════════ -->
+  <div id="onboarding-screen">
+    <div class="ob-icon">🧠</div>
+    <div class="ob-title">Welcome to LeetRepeat</div>
+    <div class="ob-sub">Spaced repetition for LeetCode — review the right problems at the right time.</div>
+
+    <ol class="ob-steps" style="list-style:none;">
+      <li>
+        <div class="ob-step-num">1</div>
+        <div>Open LeetCode — the extension will detect your session and import your solve history automatically.</div>
+      </li>
+      <li>
+        <div class="ob-step-num">2</div>
+        <div>After import, come back here to see your personalized review queue.</div>
+      </li>
+      <li>
+        <div class="ob-step-num">3</div>
+        <div>Solve problems, rate your recall (Easy / Medium / Hard), and the schedule adapts.</div>
+      </li>
+    </ol>
+
+    <button class="btn-primary" id="ob-open-btn">
+      Open LeetCode to start import →
+    </button>
+    <button class="btn-ghost" id="ob-refresh-btn">Already done? Check again ↺</button>
+
+    <div id="ob-progress" class="hidden">
+      <div class="ob-progress-bar">
+        <div class="ob-progress-fill" id="ob-progress-fill"></div>
+      </div>
+      <div class="ob-progress-text" id="ob-progress-text">Importing…</div>
     </div>
   </div>
 
-  <!-- Onboarding / loading state -->
-  <div id="onboarding-state" class="hidden">
-    <h2>Setting up your deck…</h2>
-    <p>Importing your LeetCode solve history. This may take a moment.</p>
-    <div class="spinner"></div>
-    <p id="onboarding-status" style="color:var(--subtext);font-size:12px;"></p>
-  </div>
-
-  <!-- Not signed in state -->
-  <div id="not-signed-in" class="hidden">
-    <div style="padding:32px 16px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:12px;">👤</div>
-      <h2 style="margin-bottom:8px;">Sign in to LeetCode</h2>
-      <p style="color:var(--subtext);font-size:13px;margin-bottom:16px;">
-        LeetRepeat needs your LeetCode session to import your solve history.
-      </p>
-      <a href="https://leetcode.com/accounts/login/" target="_blank"
-         style="color:var(--blue);font-size:14px;font-weight:600;">
-        Go to LeetCode →
-      </a>
-    </div>
-  </div>
-
-  <!-- Main UI (hidden until ready) -->
+  <!-- ══ MAIN UI ══════════════════════════════════════════════════════════════ -->
   <div id="main-ui" class="hidden">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <span class="logo-icon">🧠</span>
+        LeetRepeat
+      </div>
+      <div class="header-right">
+        <span class="username-chip" id="username-chip"></span>
+        <button class="header-btn" id="lc-btn" title="Open LeetCode">↗</button>
+      </div>
+    </div>
 
     <!-- Tabs -->
     <div class="tabs">
@@ -393,101 +736,158 @@
       <button class="tab" data-tab="settings">Settings</button>
     </div>
 
-    <!-- ── Today Tab ── -->
-    <div class="content" id="tab-today">
+    <!-- ── TODAY ──────────────────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-today">
 
-      <!-- Stats -->
       <div class="stats-row">
-        <div class="stat-card">
+        <div class="stat-card done">
           <div class="stat-value" id="stat-done">0</div>
-          <div class="stat-label">Done today</div>
+          <div class="stat-label">Done</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" id="stat-remaining">0</div>
-          <div class="stat-label">Remaining</div>
+        <div class="stat-card left">
+          <div class="stat-value" id="stat-left">0</div>
+          <div class="stat-label">Left</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" id="stat-due">0</div>
-          <div class="stat-label">Cards due</div>
+        <div class="stat-card due">
+          <div class="stat-value" id="stat-backlog">0</div>
+          <div class="stat-label">Backlog</div>
         </div>
       </div>
 
-      <!-- Progress -->
-      <div class="progress-section">
-        <div class="progress-label">
-          <span>Daily progress</span>
-          <span id="progress-text">0 / 0</span>
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="progress-label">Daily progress</span>
+          <span id="progress-frac" style="color:var(--sub0)">0 / 0</span>
         </div>
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill" style="width:0%"></div>
         </div>
       </div>
 
-      <!-- Checklist -->
-      <div class="section-title">Today's Queue</div>
-      <ul class="checklist" id="checklist"></ul>
-      <div class="empty-state hidden" id="checklist-empty">
-        <div class="empty-icon">🎉</div>
-        All done for today! Come back tomorrow.
-      </div>
+      <!-- Problem list -->
+      <div class="scroll-area" id="problem-scroll">
+        <div id="problem-list-wrap">
+          <div class="section-label">
+            <span>Reviews</span>
+            <div class="section-label-line"></div>
+            <span id="review-count-label"></span>
+          </div>
+          <div class="problem-list" id="review-list"></div>
 
-    </div>
+          <div class="divider" id="new-divider" style="margin: 10px 0;"></div>
 
-    <!-- ── Calendar Tab ── -->
-    <div class="content hidden" id="tab-calendar">
-      <div class="section-title" style="margin-bottom:12px;">Solve activity (past year)</div>
-      <div class="calendar-container">
-        <div class="calendar-grid" id="calendar-grid"></div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:11px;color:var(--muted);">
-        <span>Less</span>
-        <div style="width:10px;height:10px;border-radius:2px;background:var(--surface2)"></div>
-        <div style="width:10px;height:10px;border-radius:2px;background:rgba(137,180,250,0.3)"></div>
-        <div style="width:10px;height:10px;border-radius:2px;background:rgba(137,180,250,0.55)"></div>
-        <div style="width:10px;height:10px;border-radius:2px;background:rgba(137,180,250,0.8)"></div>
-        <div style="width:10px;height:10px;border-radius:2px;background:var(--blue)"></div>
-        <span>More</span>
-      </div>
-    </div>
-
-    <!-- ── Weak Areas Tab ── -->
-    <div class="content hidden" id="tab-weak">
-      <div class="section-title" style="margin-bottom:12px;">Topics by difficulty</div>
-      <div class="weak-area-list" id="weak-area-list"></div>
-      <div class="empty-state hidden" id="weak-area-empty">
-        <div class="empty-icon">📊</div>
-        Solve some problems to see your weak areas.
-      </div>
-    </div>
-
-    <!-- ── Settings Tab ── -->
-    <div class="content hidden" id="tab-settings">
-      <form class="settings-form" id="settings-form">
-        <div class="form-group">
-          <label for="daily-target">Daily target (problems)</label>
-          <input type="number" id="daily-target" min="1" max="50" value="5" />
+          <div class="section-label">
+            <span>New</span>
+            <div class="section-label-line"></div>
+            <span id="new-count-label"></span>
+          </div>
+          <div class="problem-list" id="new-list"></div>
         </div>
-        <div class="form-group">
-          <label for="blend-ratio">Review vs. New blend</label>
-          <input type="range" id="blend-ratio" min="0" max="100" step="5" value="60" />
-          <div class="range-display">
-            <span id="blend-reviews-label">60% reviews</span>
-            <span id="blend-new-label">40% new</span>
+
+        <div class="empty-state hidden" id="empty-all-done">
+          <div class="empty-icon">🎉</div>
+          <div class="empty-title">All done for today!</div>
+          <div class="empty-sub">Come back tomorrow for your next batch.</div>
+        </div>
+
+        <div class="empty-state hidden" id="empty-no-queue">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">Nothing queued yet</div>
+          <div class="empty-sub">Solve a problem on LeetCode to get started.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CALENDAR ───────────────────────────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tab-calendar">
+      <div class="calendar-section">
+        <div style="overflow-x:auto;">
+          <div id="cal-months" class="calendar-months"></div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+        <div class="cal-legend">
+          <span>Less</span>
+          <div class="cal-legend-swatch" style="background:var(--surface0)"></div>
+          <div class="cal-legend-swatch" style="background:rgba(137,180,250,0.25)"></div>
+          <div class="cal-legend-swatch" style="background:rgba(137,180,250,0.50)"></div>
+          <div class="cal-legend-swatch" style="background:rgba(137,180,250,0.75)"></div>
+          <div class="cal-legend-swatch" style="background:var(--blue)"></div>
+          <span>More</span>
+        </div>
+      </div>
+
+      <div class="cal-summary">
+        <div class="cal-stat">
+          <div class="cal-stat-value" id="cal-total">0</div>
+          <div class="cal-stat-label">Total solves</div>
+        </div>
+        <div class="cal-stat">
+          <div class="cal-stat-value" id="cal-active">0</div>
+          <div class="cal-stat-label">Active days</div>
+        </div>
+        <div class="cal-stat">
+          <div class="cal-stat-value" id="cal-streak">0</div>
+          <div class="cal-stat-label">Day streak</div>
+        </div>
+        <div class="cal-stat">
+          <div class="cal-stat-value" id="cal-best">0</div>
+          <div class="cal-stat-label">Best day</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WEAK AREAS ─────────────────────────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tab-weak">
+      <div class="scroll-area">
+        <div class="weak-list" id="weak-list"></div>
+        <div class="empty-state hidden" id="weak-empty">
+          <div class="empty-icon">📊</div>
+          <div class="empty-title">Not enough data yet</div>
+          <div class="empty-sub">Rate a few problems to see your weak topics.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ───────────────────────────────────────────────────────── -->
+    <div class="tab-panel hidden" id="tab-settings">
+      <form class="settings-form" id="settings-form">
+
+        <div class="form-field">
+          <div class="form-label">Daily target</div>
+          <div class="form-desc">Problems to review + learn each day</div>
+          <div class="stepper">
+            <button type="button" class="stepper-btn" id="target-dec">−</button>
+            <input type="number" class="stepper-val" id="target-val" min="1" max="50" value="5" />
+            <button type="button" class="stepper-btn" id="target-inc">+</button>
           </div>
         </div>
-        <div style="padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--subtext);">
-          With target <strong id="settings-preview-target" style="color:var(--text)">5</strong>:
-          <strong id="settings-preview-reviews" style="color:var(--blue)">3</strong> reviews +
-          <strong id="settings-preview-new" style="color:var(--green)">2</strong> new per day
+
+        <div class="form-field">
+          <div class="form-label">Review / New blend</div>
+          <div class="form-desc">How to split your daily target between reviews and new problems</div>
+          <div class="blend-widget">
+            <input type="range" id="blend-slider" min="50" max="90" step="5" value="60" />
+            <div class="blend-labels">
+              <span class="blend-review-label" id="blend-review-label">60% reviews</span>
+              <span class="blend-new-label" id="blend-new-label">40% new</span>
+            </div>
+            <div class="blend-preview">
+              <div class="blend-preview-review" id="blend-preview-review" style="width:60%">3</div>
+              <div class="blend-preview-new" id="blend-preview-new">2</div>
+            </div>
+          </div>
         </div>
-        <button type="submit" class="save-btn">Save Settings</button>
-        <div id="settings-saved" class="hidden" style="text-align:center;color:var(--green);font-size:13px;">
-          ✓ Settings saved
+
+        <button type="submit" class="save-btn">Save settings</button>
+        <div class="save-confirm hidden" id="save-confirm">✓ Saved</div>
+
+        <div class="danger-zone">
+          <button type="button" class="danger-btn" id="reset-btn">Reset all data…</button>
         </div>
       </form>
     </div>
 
-  </div>
+  </div><!-- /main-ui -->
 
   <script src="popup.js"></script>
 </body>
