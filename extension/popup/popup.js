@@ -425,19 +425,35 @@ function shiftDueDates(problems, n) {
 
 function getWeakAreas(problems) {
   const stats = {};
+
   for (const p of Object.values(problems)) {
-    if (!p.tags || !p.easeFactor) continue;
+    if (!p.tags || p.tags.length === 0) continue;
+
+    // Only count problems you've explicitly rated — the onboarding import
+    // entry has rating:null and doesn't reflect actual recall difficulty.
+    const ratedEntries = (p.history || []).filter(h => h.rating);
+    if (ratedEntries.length === 0) continue;
+
+    // Use the most recent rating as the signal for this problem
+    const lastRating = ratedEntries[ratedEntries.length - 1].rating;
+
     for (const tag of p.tags) {
-      if (!stats[tag]) stats[tag] = { count: 0, totalEase: 0 };
+      if (!stats[tag]) stats[tag] = { count: 0, easy: 0, medium: 0, hard: 0 };
       stats[tag].count++;
-      stats[tag].totalEase += p.easeFactor;
+      if (lastRating === 'Easy')        stats[tag].easy++;
+      else if (lastRating === 'Medium') stats[tag].medium++;
+      else if (lastRating === 'Hard')   stats[tag].hard++;
     }
   }
+
   return Object.entries(stats)
-    .map(([tag, s]) => ({ tag, avgEase: s.totalEase / s.count, count: s.count }))
-    .filter(x => x.count >= 1)
-    .sort((a, b) => a.avgEase - b.avgEase)
-    .slice(0, 12);
+    .map(([tag, s]) => ({ tag, ...s }))
+    // Sort: most Hard ratings first, then by Medium, then Easy
+    .sort((a, b) => {
+      const aScore = (a.hard * 3 + a.medium) / a.count;
+      const bScore = (b.hard * 3 + b.medium) / b.count;
+      return bScore - aScore; // highest difficulty score first
+    });
 }
 
 function buildCalData(problems) {
@@ -882,22 +898,41 @@ function renderWeakAreas() {
   show('weak-list');
   hide('weak-empty');
 
-  const MIN_EF = 1.3, MAX_EF = 3.5;
-
   for (const area of areas) {
-    const pct   = Math.round(((area.avgEase - MIN_EF) / (MAX_EF - MIN_EF)) * 100);
-    const color = area.avgEase < 1.8 ? 'var(--red)' : area.avgEase < 2.3 ? 'var(--amber)' : 'var(--green)';
-    const label = area.avgEase < 1.8 ? 'Hard' : area.avgEase < 2.3 ? 'Medium' : 'Easy';
+    const total = area.easy + area.medium + area.hard;
+
+    // Segment widths for the stacked bar (avoid zero-width segments)
+    const hardPct  = total ? Math.round((area.hard   / total) * 100) : 0;
+    const medPct   = total ? Math.round((area.medium / total) * 100) : 0;
+    const easyPct  = total ? Math.max(0, 100 - hardPct - medPct)    : 0;
+
+    // Overall trend label
+    let trendLabel, trendColor;
+    if (area.hard > area.easy && area.hard >= area.medium) {
+      trendLabel = 'Struggling'; trendColor = 'var(--red)';
+    } else if (area.medium >= area.easy) {
+      trendLabel = 'Improving';  trendColor = 'var(--amber)';
+    } else {
+      trendLabel = 'Strong';     trendColor = 'var(--green)';
+    }
 
     const item = document.createElement('div');
     item.className = 'weak-item';
     item.innerHTML = `
       <div class="weak-item-hd">
         <span class="weak-tag">${esc(area.tag)}</span>
-        <span class="weak-meta">${label} · ${area.count} problem${area.count !== 1 ? 's' : ''}</span>
+        <span class="weak-trend" style="color:${trendColor}">${trendLabel}</span>
+      </div>
+      <div class="weak-counts">
+        ${area.hard   ? `<span class="pill pill-hard">${area.hard}&thinsp;Hard</span>`    : ''}
+        ${area.medium ? `<span class="pill pill-medium">${area.medium}&thinsp;Med</span>` : ''}
+        ${area.easy   ? `<span class="pill pill-easy">${area.easy}&thinsp;Easy</span>`    : ''}
+        <span class="weak-total">${total} rated</span>
       </div>
       <div class="weak-track">
-        <div class="weak-fill" style="width:${Math.max(4, pct)}%;background:${color}"></div>
+        ${hardPct  ? `<div class="weak-seg" style="width:${hardPct}%;background:var(--red)"   title="${area.hard} Hard"></div>`   : ''}
+        ${medPct   ? `<div class="weak-seg" style="width:${medPct}%;background:var(--amber)"  title="${area.medium} Medium"></div>` : ''}
+        ${easyPct  ? `<div class="weak-seg" style="width:${easyPct}%;background:var(--green)" title="${area.easy} Easy"></div>`   : ''}
       </div>
     `;
     list.appendChild(item);

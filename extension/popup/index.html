@@ -805,11 +805,17 @@
       padding: 10px 13px;
     }
 
+    .weak-desc {
+      font-size: 12px;
+      color: var(--tx-3);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
     .weak-item-hd {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 8px;
     }
 
     .weak-tag {
@@ -819,23 +825,37 @@
       letter-spacing: -0.01em;
     }
 
-    .weak-meta {
-      font-size: 11px;
+    .weak-counts {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 5px 0 7px;
+      flex-wrap: wrap;
+    }
+    .weak-total {
+      font-size: 10.5px;
       color: var(--tx-3);
       font-weight: 500;
+      margin-left: auto;
+    }
+    .weak-trend {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .weak-track {
-      height: 4px;
+      height: 5px;
       background: var(--border);
       border-radius: 99px;
       overflow: hidden;
+      display: flex;
     }
 
-    .weak-fill {
+    .weak-seg {
       height: 100%;
-      border-radius: 99px;
-      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
     }
 
     /* ══════════════════════════════════════════════════════════════════════════
@@ -1263,14 +1283,15 @@
 
   <!-- ── WEAK AREAS ─────────────────────────────────────────────── -->
   <div class="panel hidden" id="tab-weak">
-    <div class="scroll" style="max-height:420px;">
+    <p class="weak-desc">Topics where you've rated problems — sorted with the most struggled at the top. The bar shows your Hard / Medium / Easy split.</p>
+    <div class="scroll" style="max-height:390px;">
       <div class="weak-list" id="weak-list"></div>
       <div class="empty hidden" id="weak-empty">
         <div class="empty-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
         </div>
-        <div class="empty-title">No data yet</div>
-        <div class="empty-sub">Rate a few problems to see your weak topics appear here.</div>
+        <div class="empty-title">No ratings yet</div>
+        <div class="empty-sub">Solve problems and rate them Easy, Medium, or Hard — your topic breakdown appears here.</div>
       </div>
     </div>
   </div>
