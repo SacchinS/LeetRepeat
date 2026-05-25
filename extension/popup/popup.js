@@ -162,8 +162,11 @@ function buildDailyQueue(problems, settings) {
     .slice(0, reviewSlots)
     .map(([slug]) => slug);
 
+  // Unused review slots (no reviews due yet) spill over to new problems
+  const unusedReviewSlots = reviewSlots - overdue.length;
+
   const seen = new Set(Object.keys(problems));
-  const newProblems = NC_ORDERED.filter(s => !seen.has(s)).slice(0, newSlots);
+  const newProblems = NC_ORDERED.filter(s => !seen.has(s)).slice(0, newSlots + unusedReviewSlots);
 
   return { reviews: overdue, newProblems };
 }
@@ -544,22 +547,40 @@ function renderWeakAreas() {
 
 function setupSettings() {
   const { settings } = S;
-  const targetVal  = $('target-val');
+  const targetVal   = $('target-val');
   const blendSlider = $('blend-slider');
 
   targetVal.value   = settings.dailyTarget;
   blendSlider.value = Math.round(settings.blendRatio * 100);
 
-  function syncBlend() {
+  // Compute the snapped review count and percentage for the current slider + target.
+  // Each valid position corresponds to an actual integer split (r reviews, n new).
+  // Positions between integer-split thresholds produce the same split, so we snap
+  // the slider thumb to the canonical percentage for the computed split — this way
+  // the user can only land on positions where the numbers visibly change.
+  function getSnapped() {
     const target = Math.max(1, parseInt(targetVal.value) || 5);
-    const rpct   = parseInt(blendSlider.value);
-    const npct   = 100 - rpct;
-    const rc     = Math.round(target * rpct / 100);
-    const nc     = Math.max(0, target - rc);
+    const rawPct = parseInt(blendSlider.value);
 
-    $('blend-review-lbl').textContent = `${rpct}% reviews`;
-    $('blend-new-lbl').textContent    = `${npct}% new`;
-    $('blend-bar-review').style.width = rpct + '%';
+    let rc = Math.round(target * rawPct / 100);
+    // Always keep at least 1 new slot
+    if (target >= 2) rc = Math.min(rc, target - 1);
+    rc = Math.max(0, rc);
+
+    const nc      = target - rc;
+    const snapPct = Math.round((rc / target) * 100);
+    return { target, rc, nc, snapPct };
+  }
+
+  function syncBlend() {
+    const { rc, nc, snapPct } = getSnapped();
+
+    // Snap the slider thumb so it only rests at meaningful positions
+    blendSlider.value = snapPct;
+
+    $('blend-review-lbl').textContent = `${rc} review${rc !== 1 ? 's' : ''}`;
+    $('blend-new-lbl').textContent    = `${nc} new`;
+    $('blend-bar-review').style.width = snapPct + '%';
     $('blend-bar-review').textContent = rc;
     $('blend-bar-new').textContent    = nc;
   }
@@ -578,9 +599,10 @@ function setupSettings() {
 
   $('settings-form').addEventListener('submit', async e => {
     e.preventDefault();
+    const { target, rc } = getSnapped();
     const newSettings = {
-      dailyTarget: parseInt(targetVal.value) || 5,
-      blendRatio:  parseInt(blendSlider.value) / 100,
+      dailyTarget: target,
+      blendRatio:  rc / target,   // exact ratio, not raw slider %
     };
     await storageSet({ settings: newSettings });
     S.settings = newSettings;
