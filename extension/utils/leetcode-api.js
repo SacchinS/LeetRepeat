@@ -114,8 +114,8 @@ export async function fetchFullSolveHistory(onProgress) {
       if (sub.statusDisplay !== 'Accepted') continue;
       const ts = parseInt(sub.timestamp, 10);
       const existing = solveMap.get(sub.titleSlug);
-      // Keep earliest solve date
-      if (!existing || ts < existing.timestamp) {
+      // Keep most recent solve date — reflects how fresh the problem is in memory
+      if (!existing || ts > existing.timestamp) {
         solveMap.set(sub.titleSlug, {
           title: sub.title,
           titleSlug: sub.titleSlug,

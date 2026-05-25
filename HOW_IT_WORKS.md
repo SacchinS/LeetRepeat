@@ -73,7 +73,7 @@ It can watch for changes to the page and inject new HTML (like the rating modal)
 1. Asks LeetCode: "who is logged in?" (`userStatus` query)
 2. If signed in, starts fetching your entire submission history page by page (`submissionList` query, 20 at a time)
 3. For each accepted submission, records the problem slug and the date you solved it
-4. Removes duplicates — keeps only the **earliest** solve date per problem (that's when you first learned it)
+4. Removes duplicates — keeps only the **most recent** solve date per problem (that's how fresh it is in your memory right now)
 5. For each solved problem, calculates how long ago you solved it and assigns a starting due date (more on this in the SM-2 section)
 6. Saves everything to `chrome.storage.local`
 

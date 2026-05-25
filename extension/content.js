@@ -112,7 +112,7 @@
         if (sub.statusDisplay !== 'Accepted') continue;
         const ts = parseInt(sub.timestamp, 10);
         const existing = solveMap.get(sub.titleSlug);
-        if (!existing || ts < existing.timestamp) {
+        if (!existing || ts > existing.timestamp) {
           solveMap.set(sub.titleSlug, {
             title: sub.title,
             titleSlug: sub.titleSlug,
