@@ -84,14 +84,14 @@
     let offset = 0;
     const limit = 20;
     let hasNext = true;
-    let lastKey = null;
     let pageCount = 0;
 
+    // NOTE: lastKey is always null in LeetCode's API — pagination is offset-only.
+    // Passing extra null args (questionSlug, lang, status) causes a 400.
     while (hasNext) {
       const data = await gqlFetch(`
-        query submissionList($offset: Int!, $limit: Int!, $lastKey: String) {
-          submissionList(offset: $offset, limit: $limit, lastKey: $lastKey, questionSlug: null, lang: null, status: null) {
-            lastKey
+        query submissionList($offset: Int!, $limit: Int!) {
+          submissionList(offset: $offset, limit: $limit) {
             hasNext
             submissions {
               id
@@ -102,10 +102,9 @@
             }
           }
         }
-      `, { offset, limit, lastKey });
+      `, { offset, limit });
 
       const list = data.submissionList;
-      lastKey = list.lastKey;
       hasNext = list.hasNext;
       pageCount++;
 
