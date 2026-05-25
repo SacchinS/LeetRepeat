@@ -485,7 +485,7 @@
     .prob-card:hover { border-color: var(--blue-glow); background: var(--bg-hover); }
     .prob-card:hover .card-link-icon { color: var(--tx-2); }
 
-    .prob-card.done { opacity: 0.4; pointer-events: none; }
+    .prob-card.done { opacity: 0.45; }
     .prob-card.done .card-title { text-decoration: line-through; color: var(--tx-3); }
 
     /* Difficulty left accent */
@@ -501,7 +501,7 @@
       justify-content: center;
       height: 100%;
       padding: 0 0 0 11px;
-      cursor: pointer;
+      cursor: default; /* read-only indicator — not interactive */
     }
 
     .card-check {

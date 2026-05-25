@@ -410,22 +410,11 @@ function makeCard(slug, kind, isDone, problems, todayStr) {
     <span class="card-link-icon">${icon('arrow-up-right', 13)}</span>
   `;
 
-  card.querySelector('.card-check-wrap').addEventListener('click', async e => {
-    e.preventDefault();
-    e.stopPropagation();
-    await toggleDone(slug);
-  });
+  // No click handler on the check circle — it is read-only.
+  // Done state is set exclusively by the content script after a real
+  // submission is rated via the Easy / Medium / Hard modal.
 
   return card;
-}
-
-async function toggleDone(slug) {
-  const { session } = S;
-  const idx = session.completed.indexOf(slug);
-  if (idx === -1) session.completed.push(slug);
-  else session.completed.splice(idx, 1);
-  await storageSet({ dailySession: session });
-  renderToday();
 }
 
 // ─── Calendar tab ─────────────────────────────────────────────────────────────

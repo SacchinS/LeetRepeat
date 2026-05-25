@@ -612,6 +612,18 @@
     problems[titleSlug] = problem;
 
     await storageSet({ problems, lastActiveDate: todayStr });
+
+    // Mark as complete in today's popup session so the checklist reflects
+    // the real submission — the popup checkbox is read-only and only updated here.
+    const sessionData = await storageGet(['dailySession']);
+    const session = sessionData.dailySession;
+    if (session && session.date === todayStr) {
+      if (!session.completed.includes(titleSlug)) {
+        session.completed.push(titleSlug);
+      }
+      await storageSet({ dailySession: session });
+    }
+
     console.log(`[LeetRepeat] Recorded ${rating} for ${titleSlug}, next due: ${problem.nextDue}`);
   }
 
