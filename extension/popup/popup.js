@@ -156,19 +156,79 @@ function buildDailyQueue(problems, settings) {
   let newSlots = dailyTarget - reviewSlots;
   if (newSlots < 1 && dailyTarget >= 2) { newSlots = 1; reviewSlots = dailyTarget - 1; }
 
-  const overdue = Object.entries(problems)
+  // Reviews due today (most overdue first)
+  const dueToday = Object.entries(problems)
     .filter(([, p]) => p.status === 'review' && p.nextDue && p.nextDue <= todayStr)
     .sort(([, a], [, b]) => a.nextDue.localeCompare(b.nextDue))
     .slice(0, reviewSlots)
     .map(([slug]) => slug);
 
-  // Unused review slots (no reviews due yet) spill over to new problems
-  const unusedReviewSlots = reviewSlots - overdue.length;
+  // If there aren't enough due-today reviews to fill the review slots,
+  // pull in the soonest-upcoming ones (even if not technically due yet).
+  // This ensures the review deck always fills its slots — being a day or
+  // two early is better than skipping a review slot entirely.
+  const reviews = [...dueToday];
+  if (reviews.length < reviewSlots) {
+    const dueTodaySet = new Set(reviews);
+    const upcoming = Object.entries(problems)
+      .filter(([slug, p]) =>
+        p.status === 'review' &&
+        p.nextDue &&
+        p.nextDue > todayStr &&
+        !dueTodaySet.has(slug)
+      )
+      .sort(([, a], [, b]) => a.nextDue.localeCompare(b.nextDue))
+      .slice(0, reviewSlots - reviews.length)
+      .map(([slug]) => slug);
+    reviews.push(...upcoming);
+  }
+
+  // Only truly unused slots (no review cards in the deck at all) spill to new
+  const unusedReviewSlots = reviewSlots - reviews.length;
 
   const seen = new Set(Object.keys(problems));
   const newProblems = NC_ORDERED.filter(s => !seen.has(s)).slice(0, newSlots + unusedReviewSlots);
 
-  return { reviews: overdue, newProblems };
+  return { reviews, newProblems };
+}
+
+// ─── One-time stagger migration ───────────────────────────────────────────────
+
+/**
+ * Recompute initial nextDue dates for problems that were onboarded with the
+ * old over-conservative stagger (42–120 day offsets).
+ * Only touches problems that have never been rated (history[0].rating === null
+ * and history.length === 1) — i.e., still in their pristine onboarded state.
+ */
+function recomputeInitialStagger(problems) {
+  const todayStr = today();
+  const out = {};
+
+  for (const [slug, p] of Object.entries(problems)) {
+    // Only recompute cards that have never been rated
+    const isVirgin = p.history && p.history.length === 1 && p.history[0].rating === null;
+    if (!isVirgin) { out[slug] = p; continue; }
+
+    const solvedDate = p.history[0].date;
+    const a = new Date(solvedDate + 'T00:00:00Z');
+    const b = new Date(todayStr + 'T00:00:00Z');
+    const daysSince = Math.floor((b - a) / 86400000);
+
+    let offset;
+    if (daysSince >= 730)      offset = randInt(0, 3);
+    else if (daysSince >= 180) offset = randInt(0, 7);
+    else if (daysSince >= 90)  offset = randInt(3, 14);
+    else if (daysSince >= 30)  offset = randInt(7, 21);
+    else                       offset = randInt(14, 30);
+
+    out[slug] = {
+      ...p,
+      interval: Math.max(1, offset || 1),
+      nextDue: addDays(todayStr, offset),
+    };
+  }
+
+  return out;
 }
 
 function calcMissedDays(lastActive) {
@@ -218,6 +278,10 @@ const $ = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
 
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function esc(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -264,9 +328,17 @@ async function init() {
   $('lc-btn').onclick = () => chrome.tabs.create({ url: 'https://leetcode.com' });
   $('username-text').textContent = data.username || '';
 
-  const problems = data.problems || {};
+  let problems = data.problems || {};
   const settings = { dailyTarget: 5, blendRatio: 0.6, ...(data.settings || {}) };
   const lastActiveDate = data.lastActiveDate || today();
+
+  // ── One-time migration: fix over-conservative initial stagger ────────────
+  // Old stagger pushed problems solved <2yr ago out 14–120 days from install.
+  // New stagger brings them within 0–30 days. Apply once per install, then mark done.
+  if (!data.staggerMigrated) {
+    problems = recomputeInitialStagger(problems);
+    await storageSet({ problems, staggerMigrated: true });
+  }
 
   const missed = calcMissedDays(lastActiveDate);
   let probs = missed > 0 ? shiftDueDates(problems, missed) : problems;

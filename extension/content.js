@@ -142,20 +142,25 @@
     const b = new Date(todayStr + 'T00:00:00Z');
     const daysSinceSolve = Math.floor((b - a) / 86400000);
 
+    // Stagger initial due dates so the review queue ramps up naturally
+    // over the first ~30 days rather than arriving all at once.
+    // Older solves (more likely forgotten) come due first.
     let dueOffset;
     if (daysSinceSolve >= 730) {
-      dueOffset = 0;
+      dueOffset = randInt(0, 3);    // 2+ years ago → due within 3 days
     } else if (daysSinceSolve >= 180) {
-      dueOffset = randInt(14, 28);
+      dueOffset = randInt(0, 7);    // 6 mo – 2 yr → due within a week
+    } else if (daysSinceSolve >= 90) {
+      dueOffset = randInt(3, 14);   // 3–6 months → due within 2 weeks
     } else if (daysSinceSolve >= 30) {
-      dueOffset = randInt(42, 56);
+      dueOffset = randInt(7, 21);   // 1–3 months → due within 3 weeks
     } else {
-      dueOffset = randInt(90, 120);
+      dueOffset = randInt(14, 30);  // last month → due within a month
     }
 
     const nextDue = addDays(todayStr, dueOffset);
     return {
-      interval: Math.max(1, dueOffset),
+      interval: Math.max(1, dueOffset || 1),
       easeFactor: 2.5,
       repetitions: 1,
       nextDue,
