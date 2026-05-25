@@ -263,21 +263,31 @@ function getWeakAreas(problems) {
 }
 
 function buildCalData(problems) {
-  const past   = {};  // date → completed count  (from solve history)
-  const future = {};  // date → scheduled count  (from nextDue)
+  const past         = {};  // date → completed count
+  const future       = {};  // date → scheduled count
+  const pastByDate   = {};  // date → [{ slug, title, rating }]
+  const futureByDate = {};  // date → [{ slug, title, difficulty }]
 
-  for (const p of Object.values(problems)) {
-    // Past: every rated history entry
+  for (const [slug, p] of Object.entries(problems)) {
+    const title = p.title || slugToTitle(slug);
+
+    // Past: every history entry (including onboarding first-solve with null rating)
     for (const h of (p.history || [])) {
-      if (h.date) past[h.date] = (past[h.date] || 0) + 1;
+      if (!h.date) continue;
+      past[h.date] = (past[h.date] || 0) + 1;
+      if (!pastByDate[h.date]) pastByDate[h.date] = [];
+      pastByDate[h.date].push({ slug, title, rating: h.rating });
     }
+
     // Future: upcoming scheduled reviews
     if (p.nextDue && p.status === 'review') {
       future[p.nextDue] = (future[p.nextDue] || 0) + 1;
+      if (!futureByDate[p.nextDue]) futureByDate[p.nextDue] = [];
+      futureByDate[p.nextDue].push({ slug, title, difficulty: p.leetcodeDifficulty });
     }
   }
 
-  return { past, future };
+  return { past, future, pastByDate, futureByDate };
 }
 
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
@@ -503,7 +513,7 @@ function makeCard(slug, kind, isDone, problems, todayStr) {
 // ─── Calendar tab ─────────────────────────────────────────────────────────────
 
 function renderCalendar() {
-  const { past: pastCal, future: futureCal } = buildCalData(S.problems);
+  const { past: pastCal, future: futureCal, pastByDate, futureByDate } = buildCalData(S.problems);
   const todayStr  = today();
   const todayDate = new Date(todayStr + 'T00:00:00Z');
 
@@ -559,21 +569,24 @@ function renderCalendar() {
 
       const cell = document.createElement('div');
       cell.className = 'cal-cell';
+      cell.dataset.date = dateStr;
       if (isToday) cell.classList.add('cal-today');
 
       if (!isFuture) {
-        // Past / today: blue heat from solve history
         const count = pastCal[dateStr] || 0;
         if (count > 0) {
           cell.setAttribute('data-level', Math.min(4, Math.ceil((count / maxPast) * 4)));
+          cell.title = `${dateStr}  ·  ${count} solve${count !== 1 ? 's' : ''} — click for details`;
+          cell.style.cursor = 'pointer';
+        } else {
+          cell.title = dateStr;
         }
-        cell.title = `${dateStr}  ·  ${count} solve${count !== 1 ? 's' : ''}`;
       } else {
-        // Future: purple heat from scheduled nextDue counts
         const count = futureCal[dateStr] || 0;
         if (count > 0) {
           cell.setAttribute('data-sched', Math.min(4, Math.ceil((count / maxFuture) * 4)));
-          cell.title = `${dateStr}  ·  ${count} review${count !== 1 ? 's' : ''} scheduled`;
+          cell.title = `${dateStr}  ·  ${count} review${count !== 1 ? 's' : ''} scheduled — click for details`;
+          cell.style.cursor = 'pointer';
         } else {
           cell.style.opacity = '0.25';
           cell.title = dateStr;
@@ -584,6 +597,24 @@ function renderCalendar() {
       cur2.setUTCDate(cur2.getUTCDate() + 1);
     }
   }
+
+  // ── Cell click → detail panel ─────────────────────────────────────────────
+  hide('cal-detail');  // reset on each re-render
+
+  grid.addEventListener('click', e => {
+    const cell = e.target.closest('.cal-cell[data-date]');
+    if (!cell) return;
+    const dateStr  = cell.dataset.date;
+    const todayNow = today();
+    const isFuture = dateStr > todayNow;
+    const items    = isFuture
+      ? (futureByDate[dateStr] || [])
+      : (pastByDate[dateStr]   || []);
+    if (items.length === 0) return;
+    showCalDetail(dateStr, isFuture, items);
+  });
+
+  $('cal-detail-close').onclick = () => hide('cal-detail');
 
   // ── Scroll to show today near the right edge (leaving future weeks visible)
   const calWrapper = document.querySelector('.cal-wrapper');
@@ -611,6 +642,45 @@ function renderCalendar() {
   $('cal-active').textContent = activeDays;
   $('cal-streak').textContent = streak;
   $('cal-best').textContent   = bestDay;
+}
+
+// ─── Calendar detail panel ────────────────────────────────────────────────────
+
+function showCalDetail(dateStr, isFuture, items) {
+  // Human-readable date heading
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const heading = d.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC',
+  });
+
+  $('cal-detail-heading').textContent = heading;
+  $('cal-detail-type').textContent    = isFuture ? 'Scheduled' : 'Completed';
+  $('cal-detail-type').style.color    = isFuture ? 'var(--purple)' : 'var(--blue)';
+
+  const list = $('cal-detail-list');
+  list.innerHTML = '';
+
+  for (const item of items) {
+    const a = document.createElement('a');
+    a.className = 'cal-detail-item';
+    a.href      = `https://leetcode.com/problems/${item.slug}/`;
+    a.target    = '_blank';
+    a.rel       = 'noopener';
+
+    // Rating pill for past; difficulty pill for future
+    const tag  = isFuture ? item.difficulty : item.rating;
+    const cls  = tag ? `pill pill-${tag.toLowerCase()}` : '';
+    const pill = tag ? `<span class="${cls}">${tag}</span>` : '';
+
+    a.innerHTML = `
+      <span class="cal-detail-title">${esc(item.title)}</span>
+      ${pill}
+      ${icon('arrow-up-right', 11)}
+    `;
+    list.appendChild(a);
+  }
+
+  show('cal-detail');
 }
 
 // ─── Weak areas tab ───────────────────────────────────────────────────────────
