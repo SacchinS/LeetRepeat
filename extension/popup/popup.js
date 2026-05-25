@@ -342,9 +342,60 @@ function buildDailyQueue(problems, settings) {
   const unusedReviewSlots = reviewSlots - reviews.length;
 
   const seen = new Set(Object.keys(problems));
-  const newProblems = NC_ORDERED.filter(s => !seen.has(s)).slice(0, newSlots + unusedReviewSlots);
+  const newProblems = selectNewProblems(problems, seen, newSlots + unusedReviewSlots);
 
   return { reviews, newProblems };
+}
+
+/**
+ * Pick new problems to suggest, in two passes:
+ *
+ * Pass 1 — Topic-gap fill:
+ *   Find topics the user has ZERO problems from in their deck. For each such
+ *   topic (in NC_ORDERED progression order) add the first unseen problem from
+ *   that topic. This ensures the user gets introduced to every topic rather
+ *   than going 100 problems deep in Arrays before touching DP.
+ *
+ * Pass 2 — Normal progression:
+ *   Fill remaining slots from NC_ORDERED sequentially (skipping anything
+ *   already chosen in pass 1).
+ */
+function selectNewProblems(problems, seenSlugs, count) {
+  if (count <= 0) return [];
+
+  // Build the set of topics the user has at least one problem from
+  const touchedTopics = new Set();
+  for (const p of Object.values(problems)) {
+    for (const tag of (p.tags || [])) touchedTopics.add(tag);
+  }
+
+  const unseenInOrder = NC_ORDERED.filter(s => !seenSlugs.has(s));
+
+  // Pass 1: one representative per untouched topic (earliest in NC_ORDERED)
+  const gapSlugs   = [];
+  const coveredGap = new Set(); // untouched topic tags already handled
+
+  for (const slug of unseenInOrder) {
+    const tags = NC150_TAGS[slug] || [];
+    for (const tag of tags) {
+      if (!touchedTopics.has(tag) && !coveredGap.has(tag)) {
+        gapSlugs.push(slug);
+        // Mark ALL of this slug's untouched tags covered so we don't
+        // pick a second slug for the same gap topic
+        for (const t of tags) {
+          if (!touchedTopics.has(t)) coveredGap.add(t);
+        }
+        break;
+      }
+    }
+    if (gapSlugs.length >= count) break; // early exit if we already have enough
+  }
+
+  // Pass 2: normal NC_ORDERED progression, excluding gap-fill choices
+  const gapSet  = new Set(gapSlugs);
+  const restSlugs = unseenInOrder.filter(s => !gapSet.has(s));
+
+  return [...gapSlugs, ...restSlugs].slice(0, count);
 }
 
 // ─── One-time stagger migration ───────────────────────────────────────────────
