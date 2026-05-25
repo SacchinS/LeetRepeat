@@ -4,891 +4,1239 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LeetRepeat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* ── Design tokens ──────────────────────────────────────────────────────── */
     :root {
-      --bg:       #1e1e2e;
-      --mantle:   #181825;
-      --surface0: #313244;
-      --surface1: #45475a;
-      --surface2: #585b70;
-      --text:     #cdd6f4;
-      --sub1:     #bac2de;
-      --sub0:     #a6adc8;
-      --muted:    #6c7086;
-      --blue:     #89b4fa;
-      --green:    #a6e3a1;
-      --yellow:   #f9e2af;
-      --red:      #f38ba8;
-      --mauve:    #cba6f7;
-      --teal:     #94e2d5;
-      --peach:    #fab387;
-      --r:  10px;
-      --r-sm: 6px;
+      --bg:         #0c0e17;
+      --bg-card:    #131621;
+      --bg-hover:   #1a1d2e;
+      --bg-active:  #1f2338;
+
+      --border:     #252840;
+      --border-s:   #1c1f30;
+
+      --tx-1:       #e6e9f4;
+      --tx-2:       #8890b5;
+      --tx-3:       #4c5278;
+
+      --blue:       #6b8cfa;
+      --blue-bg:    rgba(107,140,250,0.10);
+      --blue-glow:  rgba(107,140,250,0.18);
+
+      --green:      #4ade94;
+      --green-bg:   rgba(74,222,148,0.10);
+
+      --amber:      #f5c542;
+      --amber-bg:   rgba(245,197,66,0.10);
+
+      --red:        #f47474;
+      --red-bg:     rgba(244,116,116,0.10);
+
+      --purple:     #a78bfa;
+      --purple-bg:  rgba(167,139,250,0.10);
+
+      --peach:      #fb923c;
+      --peach-bg:   rgba(251,146,60,0.10);
+
+      --teal:       #2dd4bf;
+      --teal-bg:    rgba(45,212,191,0.10);
+
+      --r-xs: 4px;
+      --r-sm: 7px;
+      --r:    11px;
+      --r-lg: 15px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── Reset ──────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       width: 440px;
       background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: var(--tx-1);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
       font-size: 13px;
       line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Scrollable content areas ──────────────────────────────────────── */
-    .scroll-area {
-      max-height: 380px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: var(--surface1) transparent;
-    }
-    .scroll-area::-webkit-scrollbar { width: 4px; }
-    .scroll-area::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 99px; }
-
-    /* ── Hidden ────────────────────────────────────────────────────────── */
     .hidden { display: none !important; }
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* Shared scroll container */
+    .scroll {
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .scroll::-webkit-scrollbar { width: 3px; }
+    .scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ══════════════════════════════════════════════════════════════════════════
        ONBOARDING
-    ══════════════════════════════════════════════════════════════════════ */
-    #onboarding-screen {
-      padding: 40px 32px 36px;
-      text-align: center;
-      min-height: 380px;
+    ══════════════════════════════════════════════════════════════════════════ */
+    #ob-screen {
+      min-height: 480px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0;
+      padding: 44px 36px 40px;
+      text-align: center;
     }
-    .ob-icon { font-size: 52px; margin-bottom: 16px; }
+
+    .ob-logomark {
+      width: 52px; height: 52px;
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-glow);
+      border-radius: var(--r-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      margin-bottom: 20px;
+    }
+
     .ob-title {
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
+      color: var(--tx-1);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
     }
+
     .ob-sub {
       font-size: 13px;
-      color: var(--sub0);
+      color: var(--tx-2);
+      max-width: 290px;
+      line-height: 1.65;
       margin-bottom: 28px;
-      line-height: 1.6;
-      max-width: 300px;
     }
+
     .ob-steps {
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
-      border-radius: var(--r);
-      padding: 14px 18px;
-      text-align: left;
-      margin-bottom: 24px;
       width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 4px 0;
+      margin-bottom: 24px;
+      text-align: left;
     }
-    .ob-steps li {
+
+    .ob-step {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      color: var(--sub0);
-      font-size: 12px;
-      padding: 3px 0;
+      gap: 12px;
+      padding: 12px 16px;
     }
-    .ob-steps li + li { border-top: 1px solid var(--surface0); margin-top: 6px; padding-top: 9px; }
+    .ob-step + .ob-step {
+      border-top: 1px solid var(--border-s);
+    }
+
     .ob-step-num {
-      background: var(--blue);
-      color: var(--mantle);
-      font-weight: 700;
-      font-size: 10px;
+      width: 20px; height: 20px;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-glow);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       margin-top: 1px;
     }
+
+    .ob-step-text {
+      font-size: 12.5px;
+      color: var(--tx-2);
+      line-height: 1.55;
+    }
+
+    .ob-step-text strong {
+      color: var(--tx-1);
+      font-weight: 600;
+    }
+
     .btn-primary {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       width: 100%;
+      padding: 12px 20px;
       background: var(--blue);
-      color: var(--mantle);
+      color: #fff;
       border: none;
       border-radius: var(--r);
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: filter 0.15s, transform 0.1s;
       font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: filter 0.15s, transform 0.1s;
       margin-bottom: 10px;
     }
-    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary:hover  { filter: brightness(1.1); }
     .btn-primary:active { transform: scale(0.98); }
+
     .btn-ghost {
-      background: none;
-      border: 1px solid var(--surface1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 9px 16px;
+      background: transparent;
+      color: var(--tx-2);
+      border: 1px solid var(--border);
       border-radius: var(--r);
-      color: var(--muted);
-      padding: 8px 16px;
-      font-size: 12px;
-      cursor: pointer;
       font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
       transition: border-color 0.15s, color 0.15s;
     }
-    .btn-ghost:hover { border-color: var(--sub0); color: var(--sub0); }
+    .btn-ghost:hover { border-color: var(--tx-3); color: var(--tx-1); }
 
-    /* Onboarding progress state */
-    #ob-progress { margin-top: 16px; width: 100%; }
-    .ob-progress-bar {
-      height: 4px;
-      background: var(--surface0);
+    /* Import progress */
+    #ob-progress { width: 100%; margin-top: 20px; }
+    .ob-prog-bar  {
+      height: 3px;
+      background: var(--border);
       border-radius: 99px;
       overflow: hidden;
       margin-bottom: 8px;
     }
-    .ob-progress-fill {
+    .ob-prog-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--blue), var(--mauve));
+      background: linear-gradient(90deg, var(--blue), var(--purple));
       border-radius: 99px;
       width: 0%;
-      transition: width 0.4s ease;
-      animation: ob-pulse 2s ease-in-out infinite;
+      transition: width 0.5s ease;
+      animation: shimmer 2s ease-in-out infinite;
     }
-    @keyframes ob-pulse {
+    @keyframes shimmer {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+      50%       { opacity: 0.55; }
     }
-    .ob-progress-text { font-size: 12px; color: var(--sub0); text-align: center; }
+    .ob-prog-text { font-size: 11.5px; color: var(--tx-3); text-align: center; }
 
-    /* ══════════════════════════════════════════════════════════════════════
-       MAIN UI
-    ══════════════════════════════════════════════════════════════════════ */
-
-    /* ── Header ─────────────────────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════════════════════════════════════ */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 13px 16px 12px;
-      border-bottom: 1px solid var(--surface0);
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border-s);
+      background: linear-gradient(180deg, rgba(107,140,250,0.03) 0%, transparent 100%);
     }
+
     .logo {
       display: flex;
       align-items: center;
-      gap: 7px;
-      font-weight: 700;
+      gap: 8px;
       font-size: 15px;
+      font-weight: 700;
+      color: var(--tx-1);
+      letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 26px; height: 26px;
+      background: var(--blue-bg);
+      border: 1px solid var(--blue-glow);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--blue);
-      letter-spacing: -0.01em;
     }
-    .logo-icon { font-size: 18px; }
-    .header-right { display: flex; align-items: center; gap: 8px; }
+    .logo-dot {
+      width: 5px; height: 5px;
+      background: var(--blue);
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 6px; }
+
     .username-chip {
-      font-size: 11px;
-      color: var(--muted);
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--tx-3);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 99px;
-      padding: 3px 10px;
+      padding: 3px 10px 3px 7px;
+      letter-spacing: 0.01em;
     }
-    .header-btn {
-      background: none;
-      border: 1px solid var(--surface0);
+    .username-chip svg { opacity: 0.6; }
+
+    .icon-btn {
+      width: 28px; height: 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--r-sm);
-      color: var(--muted);
-      width: 28px;
-      height: 28px;
+      color: var(--tx-3);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 13px;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
-    .header-btn:hover { border-color: var(--blue); color: var(--blue); background: rgba(137,180,250,0.08); }
+    .icon-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-bg);
+    }
 
-    /* ── Tabs ────────────────────────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════════════════════
+       TABS
+    ══════════════════════════════════════════════════════════════════════════ */
     .tabs {
       display: flex;
-      padding: 0 16px;
-      border-bottom: 1px solid var(--surface0);
-      gap: 2px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border-s);
+      gap: 0;
     }
+
     .tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 11px;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
-      color: var(--muted);
-      padding: 9px 10px;
-      font-size: 12px;
+      color: var(--tx-3);
+      font-family: inherit;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
       margin-bottom: -1px;
       letter-spacing: 0.01em;
-      font-family: inherit;
+      white-space: nowrap;
     }
-    .tab:hover { color: var(--sub0); }
+    .tab svg { flex-shrink: 0; transition: color 0.15s; }
+    .tab:hover { color: var(--tx-2); }
     .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
-    /* ── Tab panels ──────────────────────────────────────────────────────── */
-    .tab-panel { padding: 14px 14px 16px; }
+    /* ══════════════════════════════════════════════════════════════════════════
+       TODAY TAB
+    ══════════════════════════════════════════════════════════════════════════ */
+    .panel { padding: 16px 14px 18px; }
 
-    /* ── Stats row ───────────────────────────────────────────────────────── */
+    /* Stats */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
+
     .stat-card {
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 10px 10px 8px;
-      text-align: center;
+      padding: 12px 12px 10px;
       position: relative;
       overflow: hidden;
     }
-    .stat-card::before {
+
+    .stat-card::after {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
-    .stat-card.done::before  { background: var(--green); }
-    .stat-card.left::before  { background: var(--blue); }
-    .stat-card.due::before   { background: var(--peach); }
-    .stat-value {
-      font-size: 26px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 3px;
-      letter-spacing: -0.02em;
-    }
-    .stat-card.done  .stat-value { color: var(--green); }
-    .stat-card.left  .stat-value { color: var(--blue); }
-    .stat-card.due   .stat-value { color: var(--peach); }
-    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 
-    /* ── Progress bar ────────────────────────────────────────────────────── */
-    .progress-wrap { margin-bottom: 14px; }
-    .progress-meta {
+    .stat-icon {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--tx-3);
+    }
+
+    .stat-done .stat-icon { color: var(--green); }
+    .stat-done .stat-value { color: var(--green); }
+
+    .stat-left .stat-icon { color: var(--blue); }
+    .stat-left .stat-value { color: var(--blue); }
+
+    .stat-backlog .stat-icon { color: var(--peach); }
+    .stat-backlog .stat-value { color: var(--peach); }
+
+    /* Progress */
+    .progress-wrap { margin-bottom: 18px; }
+
+    .progress-header {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 6px;
+      align-items: center;
+      margin-bottom: 8px;
     }
-    .progress-bar {
+
+    .progress-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--tx-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .progress-frac {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tx-2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-track {
       height: 5px;
-      background: var(--surface0);
+      background: var(--border);
       border-radius: 99px;
       overflow: hidden;
     }
+
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--blue), var(--mauve));
+      background: linear-gradient(90deg, var(--blue), var(--purple));
       border-radius: 99px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
     }
-    .progress-fill.complete { background: linear-gradient(90deg, var(--green), var(--teal)); }
+    .progress-fill.complete {
+      background: linear-gradient(90deg, var(--green), var(--teal));
+    }
 
-    /* ── Problem list section label ──────────────────────────────────────── */
-    .section-label {
+    /* Section labels */
+    .section-hd {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
+      gap: 8px;
       margin-bottom: 8px;
+      margin-top: 4px;
     }
-    .section-label-line {
+    .section-hd-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--tx-3);
+      white-space: nowrap;
+    }
+    .section-hd-count {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--tx-3);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 1px 7px;
+    }
+    .section-hd-line {
       flex: 1;
       height: 1px;
-      background: var(--surface0);
+      background: var(--border-s);
     }
 
-    /* ── Problem cards ───────────────────────────────────────────────────── */
-    .problem-list { display: flex; flex-direction: column; gap: 5px; }
+    /* Problem cards */
+    .prob-list { display: flex; flex-direction: column; gap: 4px; }
 
-    .problem-card {
+    .prob-card {
       display: grid;
-      grid-template-columns: 20px 1fr auto;
+      grid-template-columns: 30px 1fr auto;
       align-items: center;
-      gap: 10px;
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
-      border-left: 3px solid var(--surface1);
+      gap: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 9px 10px 9px 10px;
+      overflow: hidden;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      transition: border-color 0.15s, background 0.15s;
       text-decoration: none;
+      color: inherit;
     }
-    .problem-card:hover { border-color: var(--blue); border-left-color: var(--blue); background: rgba(137,180,250,0.04); }
-    .problem-card:active { transform: scale(0.995); }
-    .problem-card.done {
-      opacity: 0.45;
-      pointer-events: none;
-    }
-    .problem-card[data-diff="Easy"]   { border-left-color: var(--green); }
-    .problem-card[data-diff="Medium"] { border-left-color: var(--yellow); }
-    .problem-card[data-diff="Hard"]   { border-left-color: var(--red); }
-    .problem-card.done { border-left-color: var(--surface1) !important; }
 
-    /* Checkbox */
-    .card-check {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid var(--surface1);
+    .prob-card:hover { border-color: var(--blue-glow); background: var(--bg-hover); }
+    .prob-card:hover .card-link-icon { color: var(--tx-2); }
+
+    .prob-card.done { opacity: 0.4; pointer-events: none; }
+    .prob-card.done .card-title { text-decoration: line-through; color: var(--tx-3); }
+
+    /* Difficulty left accent */
+    .prob-card[data-diff="Easy"]   { border-left-color: var(--green); }
+    .prob-card[data-diff="Medium"] { border-left-color: var(--amber); }
+    .prob-card[data-diff="Hard"]   { border-left-color: var(--red); }
+    .prob-card.done { border-left-color: var(--border) !important; }
+
+    /* Check column */
+    .card-check-wrap {
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.2s, border-color 0.2s;
-      pointer-events: all;
+      height: 100%;
+      padding: 0 0 0 11px;
+      cursor: pointer;
     }
-    .problem-card.done .card-check {
+
+    .card-check {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .prob-card.done .card-check {
       background: var(--green);
       border-color: var(--green);
+      color: #0c0e17;
     }
-    .card-check-icon { display: none; font-size: 9px; color: var(--mantle); font-weight: 900; }
-    .problem-card.done .card-check-icon { display: block; }
 
-    /* Card body */
-    .card-body { min-width: 0; }
+    /* Card content */
+    .card-body {
+      padding: 9px 10px 9px 10px;
+      min-width: 0;
+    }
+
     .card-title {
+      display: block;
       font-size: 13px;
       font-weight: 600;
-      color: var(--text);
+      color: var(--tx-1);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 3px;
-      display: block;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
     }
-    .problem-card.done .card-title { text-decoration: line-through; color: var(--muted); }
+
     .card-tags { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
 
-    /* Pill badges */
+    /* Pills */
     .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
       font-size: 10px;
       font-weight: 700;
-      padding: 1px 7px;
+      padding: 2px 7px;
       border-radius: 99px;
       white-space: nowrap;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
     }
-    .pill-review  { background: rgba(137,180,250,0.12); color: var(--blue); }
-    .pill-new     { background: rgba(166,227,161,0.12); color: var(--green); }
-    .pill-easy    { background: rgba(166,227,161,0.12); color: var(--green); }
-    .pill-medium  { background: rgba(249,226,175,0.12); color: var(--yellow); }
-    .pill-hard    { background: rgba(243,139,168,0.12); color: var(--red); }
-    .pill-overdue { background: rgba(250,179,135,0.12); color: var(--peach); }
+    .pill svg { flex-shrink: 0; }
 
-    /* Card action: external link icon */
-    .card-link {
-      font-size: 13px;
-      color: var(--surface1);
-      flex-shrink: 0;
+    .pill-review  { background: var(--blue-bg);  color: var(--blue); }
+    .pill-new     { background: var(--green-bg);  color: var(--green); }
+    .pill-easy    { background: var(--green-bg);  color: var(--green); }
+    .pill-medium  { background: var(--amber-bg);  color: var(--amber); }
+    .pill-hard    { background: var(--red-bg);    color: var(--red); }
+    .pill-overdue { background: var(--peach-bg);  color: var(--peach); }
+
+    /* Card link icon */
+    .card-link-icon {
+      padding: 0 12px 0 4px;
+      color: var(--tx-3);
+      display: flex;
+      align-items: center;
+      height: 100%;
       transition: color 0.15s;
-      line-height: 1;
-      padding-left: 4px;
     }
-    .problem-card:hover .card-link { color: var(--muted); }
 
-    /* ── Empty / done states ──────────────────────────────────────────────── */
-    .empty-state {
+    /* Divider between sections */
+    .section-gap { height: 14px; }
+
+    /* Empty states */
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      padding: 32px 20px;
-      color: var(--muted);
+      padding: 36px 20px;
+      gap: 10px;
     }
-    .empty-icon { font-size: 36px; margin-bottom: 10px; }
-    .empty-title { font-size: 15px; font-weight: 600; color: var(--sub0); margin-bottom: 4px; }
-    .empty-sub { font-size: 12px; color: var(--muted); }
+    .empty-icon {
+      width: 44px; height: 44px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--tx-3);
+    }
+    .empty-title { font-size: 14px; font-weight: 600; color: var(--tx-2); }
+    .empty-sub   { font-size: 12px; color: var(--tx-3); max-width: 220px; line-height: 1.55; }
 
-    /* ══════════════════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════════════════════════
        CALENDAR TAB
-    ══════════════════════════════════════════════════════════════════════ */
-    .calendar-section { margin-bottom: 12px; }
-    .calendar-months {
-      display: grid;
-      grid-template-columns: repeat(53, 10px);
-      margin-bottom: 3px;
-      min-width: max-content;
+    ══════════════════════════════════════════════════════════════════════════ */
+    .cal-wrapper {
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+    }
+    .cal-wrapper::-webkit-scrollbar { height: 3px; }
+    .cal-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .cal-inner { display: inline-block; }
+
+    /* Month labels sit above the grid */
+    .cal-months {
+      position: relative;
+      height: 18px;
+      margin-bottom: 4px;
     }
     .cal-month-label {
+      position: absolute;
+      top: 0;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--tx-3);
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(53, 11px);
+      grid-template-rows: repeat(7, 11px);
+      gap: 2.5px;
+    }
+
+    .cal-cell {
+      width: 11px; height: 11px;
+      border-radius: 2px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-s);
+      transition: transform 0.1s;
+      cursor: default;
+    }
+    .cal-cell:hover { transform: scale(1.5); z-index: 1; }
+
+    .cal-cell[data-level="1"] { background: rgba(107,140,250,0.20); border-color: rgba(107,140,250,0.20); }
+    .cal-cell[data-level="2"] { background: rgba(107,140,250,0.42); border-color: rgba(107,140,250,0.40); }
+    .cal-cell[data-level="3"] { background: rgba(107,140,250,0.68); border-color: rgba(107,140,250,0.60); }
+    .cal-cell[data-level="4"] { background: var(--blue);             border-color: var(--blue); }
+    .cal-cell.cal-today { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+    /* Day-of-week labels */
+    .cal-days-col {
+      display: grid;
+      grid-template-rows: repeat(7, 11px);
+      gap: 2.5px;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+    .cal-day-lbl {
       font-size: 9px;
-      color: var(--muted);
       font-weight: 600;
+      color: var(--tx-3);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      height: 11px;
     }
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(53, 10px);
-      grid-template-rows: repeat(7, 10px);
-      gap: 2px;
-      min-width: max-content;
-    }
-    .cal-cell {
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-      background: var(--surface0);
-      cursor: default;
-      transition: transform 0.1s;
-    }
-    .cal-cell:hover { transform: scale(1.4); z-index: 1; }
-    .cal-cell[data-level="1"] { background: rgba(137,180,250,0.25); }
-    .cal-cell[data-level="2"] { background: rgba(137,180,250,0.50); }
-    .cal-cell[data-level="3"] { background: rgba(137,180,250,0.75); }
-    .cal-cell[data-level="4"] { background: var(--blue); }
-    .cal-cell.today-cell { outline: 1px solid var(--blue); outline-offset: 1px; }
+
+    .cal-flex { display: flex; align-items: flex-start; }
 
     .cal-legend {
       display: flex;
-      gap: 5px;
       align-items: center;
-      margin-top: 8px;
-      font-size: 10px;
-      color: var(--muted);
+      gap: 5px;
+      margin-top: 10px;
     }
-    .cal-legend-swatch {
+    .cal-legend-text { font-size: 10.5px; color: var(--tx-3); }
+    .cal-swatch {
       width: 10px; height: 10px;
       border-radius: 2px;
     }
 
-    .cal-summary {
+    .cal-stats {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 16px;
     }
     .cal-stat {
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 10px 12px;
+      padding: 10px 10px 8px;
     }
-    .cal-stat-value { font-size: 20px; font-weight: 800; color: var(--blue); letter-spacing: -0.02em; }
-    .cal-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 2px; }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       WEAK AREAS TAB
-    ══════════════════════════════════════════════════════════════════════ */
-    .weak-list { display: flex; flex-direction: column; gap: 6px; }
-    .weak-item {
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
-      border-radius: var(--r);
-      padding: 9px 12px;
-    }
-    .weak-item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-    .weak-tag { font-size: 12px; font-weight: 600; color: var(--text); }
-    .weak-meta { font-size: 11px; color: var(--muted); }
-    .weak-bar-track {
-      height: 4px;
-      background: var(--surface0);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-    .weak-bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       SETTINGS TAB
-    ══════════════════════════════════════════════════════════════════════ */
-    .settings-form { display: flex; flex-direction: column; gap: 18px; }
-    .form-field { display: flex; flex-direction: column; gap: 8px; }
-    .form-label {
-      font-size: 11px;
+    .cal-stat-icon { color: var(--tx-3); margin-bottom: 6px; }
+    .cal-stat-val {
+      font-size: 20px;
       font-weight: 700;
-      color: var(--sub0);
+      letter-spacing: -0.03em;
+      color: var(--tx-1);
+      line-height: 1;
+      margin-bottom: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+    .cal-stat-lbl {
+      font-size: 10px;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      color: var(--tx-3);
     }
-    .form-desc { font-size: 11px; color: var(--muted); margin-top: -4px; }
 
-    /* Number stepper */
-    .stepper {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      background: var(--mantle);
-      border: 1px solid var(--surface0);
+    /* ══════════════════════════════════════════════════════════════════════════
+       WEAK AREAS TAB
+    ══════════════════════════════════════════════════════════════════════════ */
+    .weak-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .weak-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: var(--r);
+      padding: 10px 13px;
+    }
+
+    .weak-item-hd {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .weak-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tx-1);
+      letter-spacing: -0.01em;
+    }
+
+    .weak-meta {
+      font-size: 11px;
+      color: var(--tx-3);
+      font-weight: 500;
+    }
+
+    .weak-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
       overflow: hidden;
-      width: fit-content;
+    }
+
+    .weak-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SETTINGS TAB
+    ══════════════════════════════════════════════════════════════════════════ */
+    .settings-form { display: flex; flex-direction: column; gap: 22px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--tx-3);
+    }
+    .field-desc {
+      font-size: 12px;
+      color: var(--tx-3);
+      line-height: 1.5;
+      margin-top: -2px;
+    }
+
+    /* Stepper */
+    .stepper {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
     }
     .stepper-btn {
+      width: 36px; height: 36px;
       background: none;
       border: none;
-      color: var(--sub0);
-      width: 36px;
-      height: 36px;
-      font-size: 18px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s, color 0.15s;
+      color: var(--tx-2);
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
     }
-    .stepper-btn:hover { background: var(--surface0); color: var(--text); }
+    .stepper-btn:hover { background: var(--bg-hover); color: var(--tx-1); }
+    .stepper-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
     .stepper-val {
-      width: 52px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
+      width: 48px; height: 36px;
       background: none;
       border: none;
-      border-left: 1px solid var(--surface0);
-      border-right: 1px solid var(--surface0);
-      padding: 0;
-      height: 36px;
+      color: var(--tx-1);
       font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
     }
     .stepper-val:focus { outline: none; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-    /* Blend slider */
-    .blend-widget { display: flex; flex-direction: column; gap: 8px; }
+    /* Blend */
+    .blend-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
     .blend-labels {
       display: flex;
       justify-content: space-between;
       font-size: 12px;
+      font-weight: 600;
     }
-    .blend-review-label { color: var(--blue); font-weight: 600; }
-    .blend-new-label    { color: var(--green); font-weight: 600; }
+    .blend-review { color: var(--blue); }
+    .blend-new    { color: var(--green); }
+
     input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
       height: 5px;
-      background: var(--surface0);
+      background: var(--border);
       border-radius: 99px;
       outline: none;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 17px; height: 17px;
       border-radius: 50%;
       background: var(--blue);
       cursor: pointer;
-      box-shadow: 0 0 0 3px rgba(137,180,250,0.2);
+      box-shadow: 0 0 0 3px var(--blue-bg);
+      transition: box-shadow 0.15s;
     }
-    .blend-preview {
+    input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 0 5px var(--blue-bg);
+    }
+
+    .blend-bar {
       display: flex;
-      height: 28px;
+      height: 26px;
       border-radius: var(--r-sm);
       overflow: hidden;
-      border: 1px solid var(--surface0);
+      border: 1px solid var(--border);
     }
-    .blend-preview-review {
-      background: rgba(137,180,250,0.25);
+    .blend-bar-review {
+      background: var(--blue-bg);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
       color: var(--blue);
-      transition: width 0.3s ease;
+      transition: width 0.25s ease;
+      border-right: 1px solid var(--border);
     }
-    .blend-preview-new {
-      background: rgba(166,227,161,0.15);
+    .blend-bar-new {
+      flex: 1;
+      background: var(--green-bg);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
       color: var(--green);
-      transition: width 0.3s ease;
-      flex: 1;
     }
 
+    /* Save button */
     .save-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 11px;
       background: var(--blue);
-      color: var(--mantle);
+      color: #fff;
       border: none;
       border-radius: var(--r);
-      padding: 11px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
       font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
       transition: filter 0.15s, transform 0.1s;
+      letter-spacing: -0.01em;
     }
-    .save-btn:hover { filter: brightness(1.1); }
+    .save-btn:hover  { filter: brightness(1.1); }
     .save-btn:active { transform: scale(0.98); }
+
     .save-confirm {
       text-align: center;
-      color: var(--green);
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
-      animation: fadeIn 0.2s ease;
+      color: var(--green);
+      animation: fade-up 0.2s ease;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
-    /* Divider */
-    .divider {
-      height: 1px;
-      background: var(--surface0);
-      margin: 2px 0;
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: none; }
     }
 
-    /* Reset link */
+    /* Danger zone */
     .danger-zone {
-      border-top: 1px solid var(--surface0);
-      padding-top: 14px;
-      margin-top: 4px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-s);
     }
     .danger-btn {
       background: none;
-      border: 1px solid rgba(243,139,168,0.3);
+      border: 1px solid rgba(244,116,116,0.25);
       border-radius: var(--r-sm);
       color: var(--red);
-      padding: 7px 12px;
-      font-size: 11px;
+      padding: 7px 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       font-family: inherit;
-      opacity: 0.7;
+      opacity: 0.65;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       transition: opacity 0.15s, border-color 0.15s;
     }
-    .danger-btn:hover { opacity: 1; border-color: var(--red); }
+    .danger-btn:hover { opacity: 1; border-color: rgba(244,116,116,0.5); }
   </style>
 </head>
 <body>
 
-  <!-- ══ ONBOARDING ══════════════════════════════════════════════════════════ -->
-  <div id="onboarding-screen">
-    <div class="ob-icon">🧠</div>
-    <div class="ob-title">Welcome to LeetRepeat</div>
-    <div class="ob-sub">Spaced repetition for LeetCode — review the right problems at the right time.</div>
+<!-- ═══════════════════════════════════════════════════════
+     ONBOARDING
+════════════════════════════════════════════════════════ -->
+<div id="ob-screen">
+  <div class="ob-logomark">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>
+  </div>
+  <div class="ob-title">Welcome to LeetRepeat</div>
+  <div class="ob-sub">Spaced repetition for LeetCode — review the right problems at the right time.</div>
 
-    <ol class="ob-steps" style="list-style:none;">
-      <li>
-        <div class="ob-step-num">1</div>
-        <div>Open LeetCode — the extension will detect your session and import your solve history automatically.</div>
-      </li>
-      <li>
-        <div class="ob-step-num">2</div>
-        <div>After import, come back here to see your personalized review queue.</div>
-      </li>
-      <li>
-        <div class="ob-step-num">3</div>
-        <div>Solve problems, rate your recall (Easy / Medium / Hard), and the schedule adapts.</div>
-      </li>
-    </ol>
-
-    <button class="btn-primary" id="ob-open-btn">
-      Open LeetCode to start import →
-    </button>
-    <button class="btn-ghost" id="ob-refresh-btn">Already done? Check again ↺</button>
-
-    <div id="ob-progress" class="hidden">
-      <div class="ob-progress-bar">
-        <div class="ob-progress-fill" id="ob-progress-fill"></div>
+  <div class="ob-steps">
+    <div class="ob-step">
+      <div class="ob-step-num">1</div>
+      <div class="ob-step-text">
+        <strong>Open LeetCode</strong> — the extension detects your session and imports your full solve history automatically.
       </div>
-      <div class="ob-progress-text" id="ob-progress-text">Importing…</div>
+    </div>
+    <div class="ob-step">
+      <div class="ob-step-num">2</div>
+      <div class="ob-step-text">
+        Come back here to see your <strong>personalized review queue</strong>, built from the Neetcode 150.
+      </div>
+    </div>
+    <div class="ob-step">
+      <div class="ob-step-num">3</div>
+      <div class="ob-step-text">
+        Solve problems, rate your recall — the <strong>SM-2 algorithm</strong> spaces your reviews automatically.
+      </div>
     </div>
   </div>
 
-  <!-- ══ MAIN UI ══════════════════════════════════════════════════════════════ -->
-  <div id="main-ui" class="hidden">
+  <button class="btn-primary" id="ob-open-btn">
+    Open LeetCode
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+  </button>
+  <button class="btn-ghost" id="ob-refresh-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    Already done? Check again
+  </button>
 
-    <!-- Header -->
-    <div class="header">
-      <div class="logo">
-        <span class="logo-icon">🧠</span>
-        LeetRepeat
+  <div id="ob-progress" class="hidden">
+    <div class="ob-prog-bar"><div class="ob-prog-fill" id="ob-prog-fill"></div></div>
+    <div class="ob-prog-text" id="ob-prog-text">Importing…</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN UI
+════════════════════════════════════════════════════════ -->
+<div id="main-ui" class="hidden">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>
       </div>
-      <div class="header-right">
-        <span class="username-chip" id="username-chip"></span>
-        <button class="header-btn" id="lc-btn" title="Open LeetCode">↗</button>
+      LeetRepeat
+    </div>
+    <div class="header-right">
+      <div class="username-chip" id="username-chip">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="username-text"></span>
+      </div>
+      <button class="icon-btn" id="lc-btn" title="Open LeetCode">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="today">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Today
+    </button>
+    <button class="tab" data-tab="calendar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+      Calendar
+    </button>
+    <button class="tab" data-tab="weak">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+      Weak Areas
+    </button>
+    <button class="tab" data-tab="settings">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      Settings
+    </button>
+  </div>
+
+  <!-- ── TODAY ──────────────────────────────────────────────────── -->
+  <div class="panel" id="tab-today">
+    <div class="stats-row">
+      <div class="stat-card stat-done">
+        <div class="stat-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="stat-value" id="stat-done">0</div>
+        <div class="stat-label">Done</div>
+      </div>
+      <div class="stat-card stat-left">
+        <div class="stat-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-value" id="stat-left">0</div>
+        <div class="stat-label">Left</div>
+      </div>
+      <div class="stat-card stat-backlog">
+        <div class="stat-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="stat-value" id="stat-backlog">0</div>
+        <div class="stat-label">Backlog</div>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" data-tab="today">Today</button>
-      <button class="tab" data-tab="calendar">Calendar</button>
-      <button class="tab" data-tab="weak">Weak Areas</button>
-      <button class="tab" data-tab="settings">Settings</button>
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span class="progress-label" id="progress-label">Daily progress</span>
+        <span class="progress-frac" id="progress-frac">0 / 0</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
     </div>
 
-    <!-- ── TODAY ──────────────────────────────────────────────────────────── -->
-    <div class="tab-panel" id="tab-today">
+    <!-- Problem list -->
+    <div class="scroll" style="max-height:340px;" id="prob-scroll">
+      <div id="prob-list-wrap">
+        <div class="section-hd">
+          <span class="section-hd-label">Reviews</span>
+          <span class="section-hd-count" id="review-count">0</span>
+          <div class="section-hd-line"></div>
+        </div>
+        <div class="prob-list" id="review-list"></div>
 
-      <div class="stats-row">
-        <div class="stat-card done">
-          <div class="stat-value" id="stat-done">0</div>
-          <div class="stat-label">Done</div>
+        <div class="section-gap"></div>
+
+        <div class="section-hd" id="new-section-hd">
+          <span class="section-hd-label">New</span>
+          <span class="section-hd-count" id="new-count">0</span>
+          <div class="section-hd-line"></div>
         </div>
-        <div class="stat-card left">
-          <div class="stat-value" id="stat-left">0</div>
-          <div class="stat-label">Left</div>
-        </div>
-        <div class="stat-card due">
-          <div class="stat-value" id="stat-backlog">0</div>
-          <div class="stat-label">Backlog</div>
-        </div>
+        <div class="prob-list" id="new-list"></div>
       </div>
 
-      <div class="progress-wrap">
-        <div class="progress-meta">
-          <span id="progress-label">Daily progress</span>
-          <span id="progress-frac" style="color:var(--sub0)">0 / 0</span>
+      <div class="empty hidden" id="empty-done">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-        </div>
+        <div class="empty-title">All done for today!</div>
+        <div class="empty-sub">Come back tomorrow for your next batch.</div>
       </div>
 
-      <!-- Problem list -->
-      <div class="scroll-area" id="problem-scroll">
-        <div id="problem-list-wrap">
-          <div class="section-label">
-            <span>Reviews</span>
-            <div class="section-label-line"></div>
-            <span id="review-count-label"></span>
+      <div class="empty hidden" id="empty-queue">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        </div>
+        <div class="empty-title">Nothing queued yet</div>
+        <div class="empty-sub">Solve a problem on LeetCode to get started.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CALENDAR ───────────────────────────────────────────────── -->
+  <div class="panel hidden" id="tab-calendar">
+    <div class="cal-wrapper">
+      <div class="cal-inner">
+        <div class="cal-months" id="cal-months"></div>
+        <div class="cal-flex">
+          <div class="cal-days-col">
+            <div class="cal-day-lbl"></div><!-- Sun - hidden -->
+            <div class="cal-day-lbl">M</div>
+            <div class="cal-day-lbl"></div><!-- Tue - hidden -->
+            <div class="cal-day-lbl">W</div>
+            <div class="cal-day-lbl"></div><!-- Thu - hidden -->
+            <div class="cal-day-lbl">F</div>
+            <div class="cal-day-lbl"></div><!-- Sat - hidden -->
           </div>
-          <div class="problem-list" id="review-list"></div>
-
-          <div class="divider" id="new-divider" style="margin: 10px 0;"></div>
-
-          <div class="section-label">
-            <span>New</span>
-            <div class="section-label-line"></div>
-            <span id="new-count-label"></span>
-          </div>
-          <div class="problem-list" id="new-list"></div>
-        </div>
-
-        <div class="empty-state hidden" id="empty-all-done">
-          <div class="empty-icon">🎉</div>
-          <div class="empty-title">All done for today!</div>
-          <div class="empty-sub">Come back tomorrow for your next batch.</div>
-        </div>
-
-        <div class="empty-state hidden" id="empty-no-queue">
-          <div class="empty-icon">📭</div>
-          <div class="empty-title">Nothing queued yet</div>
-          <div class="empty-sub">Solve a problem on LeetCode to get started.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── CALENDAR ───────────────────────────────────────────────────────── -->
-    <div class="tab-panel hidden" id="tab-calendar">
-      <div class="calendar-section">
-        <div style="overflow-x:auto;">
-          <div id="cal-months" class="calendar-months"></div>
-          <div class="calendar-grid" id="calendar-grid"></div>
+          <div class="cal-grid" id="cal-grid"></div>
         </div>
         <div class="cal-legend">
-          <span>Less</span>
-          <div class="cal-legend-swatch" style="background:var(--surface0)"></div>
-          <div class="cal-legend-swatch" style="background:rgba(137,180,250,0.25)"></div>
-          <div class="cal-legend-swatch" style="background:rgba(137,180,250,0.50)"></div>
-          <div class="cal-legend-swatch" style="background:rgba(137,180,250,0.75)"></div>
-          <div class="cal-legend-swatch" style="background:var(--blue)"></div>
-          <span>More</span>
-        </div>
-      </div>
-
-      <div class="cal-summary">
-        <div class="cal-stat">
-          <div class="cal-stat-value" id="cal-total">0</div>
-          <div class="cal-stat-label">Total solves</div>
-        </div>
-        <div class="cal-stat">
-          <div class="cal-stat-value" id="cal-active">0</div>
-          <div class="cal-stat-label">Active days</div>
-        </div>
-        <div class="cal-stat">
-          <div class="cal-stat-value" id="cal-streak">0</div>
-          <div class="cal-stat-label">Day streak</div>
-        </div>
-        <div class="cal-stat">
-          <div class="cal-stat-value" id="cal-best">0</div>
-          <div class="cal-stat-label">Best day</div>
+          <span class="cal-legend-text">Less</span>
+          <div class="cal-swatch" style="background:var(--bg-card);border:1px solid var(--border-s)"></div>
+          <div class="cal-swatch" style="background:rgba(107,140,250,0.20)"></div>
+          <div class="cal-swatch" style="background:rgba(107,140,250,0.42)"></div>
+          <div class="cal-swatch" style="background:rgba(107,140,250,0.68)"></div>
+          <div class="cal-swatch" style="background:var(--blue)"></div>
+          <span class="cal-legend-text">More</span>
         </div>
       </div>
     </div>
 
-    <!-- ── WEAK AREAS ─────────────────────────────────────────────────────── -->
-    <div class="tab-panel hidden" id="tab-weak">
-      <div class="scroll-area">
-        <div class="weak-list" id="weak-list"></div>
-        <div class="empty-state hidden" id="weak-empty">
-          <div class="empty-icon">📊</div>
-          <div class="empty-title">Not enough data yet</div>
-          <div class="empty-sub">Rate a few problems to see your weak topics.</div>
+    <div class="cal-stats">
+      <div class="cal-stat">
+        <div class="cal-stat-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
+        <div class="cal-stat-val" id="cal-total">0</div>
+        <div class="cal-stat-lbl">Total</div>
+      </div>
+      <div class="cal-stat">
+        <div class="cal-stat-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        </div>
+        <div class="cal-stat-val" id="cal-active">0</div>
+        <div class="cal-stat-lbl">Days</div>
+      </div>
+      <div class="cal-stat">
+        <div class="cal-stat-icon" style="color:var(--peach)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </div>
+        <div class="cal-stat-val" id="cal-streak">0</div>
+        <div class="cal-stat-lbl">Streak</div>
+      </div>
+      <div class="cal-stat">
+        <div class="cal-stat-icon" style="color:var(--amber)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="cal-stat-val" id="cal-best">0</div>
+        <div class="cal-stat-lbl">Best day</div>
       </div>
     </div>
+  </div>
 
-    <!-- ── SETTINGS ───────────────────────────────────────────────────────── -->
-    <div class="tab-panel hidden" id="tab-settings">
-      <form class="settings-form" id="settings-form">
+  <!-- ── WEAK AREAS ─────────────────────────────────────────────── -->
+  <div class="panel hidden" id="tab-weak">
+    <div class="scroll" style="max-height:420px;">
+      <div class="weak-list" id="weak-list"></div>
+      <div class="empty hidden" id="weak-empty">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+        </div>
+        <div class="empty-title">No data yet</div>
+        <div class="empty-sub">Rate a few problems to see your weak topics appear here.</div>
+      </div>
+    </div>
+  </div>
 
-        <div class="form-field">
-          <div class="form-label">Daily target</div>
-          <div class="form-desc">Problems to review + learn each day</div>
-          <div class="stepper">
-            <button type="button" class="stepper-btn" id="target-dec">−</button>
-            <input type="number" class="stepper-val" id="target-val" min="1" max="50" value="5" />
-            <button type="button" class="stepper-btn" id="target-inc">+</button>
+  <!-- ── SETTINGS ───────────────────────────────────────────────── -->
+  <div class="panel hidden" id="tab-settings">
+    <form class="settings-form" id="settings-form">
+
+      <div class="field">
+        <div class="field-label">Daily target</div>
+        <div class="field-desc">Total problems to complete each day</div>
+        <div class="stepper">
+          <button type="button" class="stepper-btn" id="target-dec">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+          </button>
+          <div class="stepper-sep"></div>
+          <input type="number" class="stepper-val" id="target-val" min="1" max="50" value="5" />
+          <div class="stepper-sep"></div>
+          <button type="button" class="stepper-btn" id="target-inc">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Review / New blend</div>
+        <div class="field-desc">Split between reviewing old problems and learning new ones</div>
+        <div class="blend-box">
+          <div class="blend-labels">
+            <span class="blend-review" id="blend-review-lbl">60% reviews</span>
+            <span class="blend-new"    id="blend-new-lbl">40% new</span>
+          </div>
+          <input type="range" id="blend-slider" min="50" max="90" step="5" value="60" />
+          <div class="blend-bar">
+            <div class="blend-bar-review" id="blend-bar-review" style="width:60%">3</div>
+            <div class="blend-bar-new"    id="blend-bar-new">2</div>
           </div>
         </div>
+      </div>
 
-        <div class="form-field">
-          <div class="form-label">Review / New blend</div>
-          <div class="form-desc">How to split your daily target between reviews and new problems</div>
-          <div class="blend-widget">
-            <input type="range" id="blend-slider" min="50" max="90" step="5" value="60" />
-            <div class="blend-labels">
-              <span class="blend-review-label" id="blend-review-label">60% reviews</span>
-              <span class="blend-new-label" id="blend-new-label">40% new</span>
-            </div>
-            <div class="blend-preview">
-              <div class="blend-preview-review" id="blend-preview-review" style="width:60%">3</div>
-              <div class="blend-preview-new" id="blend-preview-new">2</div>
-            </div>
-          </div>
-        </div>
+      <button type="submit" class="save-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Save settings
+      </button>
+      <div class="save-confirm hidden" id="save-confirm">Settings saved</div>
 
-        <button type="submit" class="save-btn">Save settings</button>
-        <div class="save-confirm hidden" id="save-confirm">✓ Saved</div>
+      <div class="danger-zone">
+        <button type="button" class="danger-btn" id="reset-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          Reset all data
+        </button>
+      </div>
+    </form>
+  </div>
 
-        <div class="danger-zone">
-          <button type="button" class="danger-btn" id="reset-btn">Reset all data…</button>
-        </div>
-      </form>
-    </div>
+</div><!-- /main-ui -->
 
-  </div><!-- /main-ui -->
-
-  <script src="popup.js"></script>
+<script src="popup.js"></script>
 </body>
 </html>
