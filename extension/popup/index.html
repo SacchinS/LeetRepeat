@@ -555,8 +555,8 @@
     }
     .pill svg { flex-shrink: 0; }
 
-    .pill-review  { background: var(--blue-bg);  color: var(--blue); }
-    .pill-new     { background: var(--green-bg);  color: var(--green); }
+    .pill-review  { background: var(--blue-bg);   color: var(--blue); }
+    .pill-new     { background: var(--purple-bg); color: var(--purple); }
     .pill-easy    { background: var(--green-bg);  color: var(--green); }
     .pill-medium  { background: var(--amber-bg);  color: var(--amber); }
     .pill-hard    { background: var(--red-bg);    color: var(--red); }
@@ -630,7 +630,7 @@
 
     .cal-grid {
       display: grid;
-      grid-template-columns: repeat(53, 11px);
+      /* grid-template-columns set dynamically by JS */
       grid-template-rows: repeat(7, 11px);
       gap: 2.5px;
     }
@@ -645,10 +645,18 @@
     }
     .cal-cell:hover { transform: scale(1.5); z-index: 1; }
 
+    /* Past completions — blue heat */
     .cal-cell[data-level="1"] { background: rgba(107,140,250,0.20); border-color: rgba(107,140,250,0.20); }
     .cal-cell[data-level="2"] { background: rgba(107,140,250,0.42); border-color: rgba(107,140,250,0.40); }
     .cal-cell[data-level="3"] { background: rgba(107,140,250,0.68); border-color: rgba(107,140,250,0.60); }
     .cal-cell[data-level="4"] { background: var(--blue);             border-color: var(--blue); }
+
+    /* Future scheduled reviews — purple heat */
+    .cal-cell[data-sched="1"] { background: rgba(167,139,250,0.18); border-color: rgba(167,139,250,0.20); }
+    .cal-cell[data-sched="2"] { background: rgba(167,139,250,0.38); border-color: rgba(167,139,250,0.38); }
+    .cal-cell[data-sched="3"] { background: rgba(167,139,250,0.62); border-color: rgba(167,139,250,0.58); }
+    .cal-cell[data-sched="4"] { background: var(--purple);           border-color: var(--purple); }
+
     .cal-cell.cal-today { outline: 2px solid var(--blue); outline-offset: 1px; }
 
     /* Day-of-week labels */
@@ -1127,13 +1135,15 @@
           <div class="cal-grid" id="cal-grid"></div>
         </div>
         <div class="cal-legend">
-          <span class="cal-legend-text">Less</span>
+          <span class="cal-legend-text">Completed</span>
           <div class="cal-swatch" style="background:var(--bg-card);border:1px solid var(--border-s)"></div>
-          <div class="cal-swatch" style="background:rgba(107,140,250,0.20)"></div>
-          <div class="cal-swatch" style="background:rgba(107,140,250,0.42)"></div>
-          <div class="cal-swatch" style="background:rgba(107,140,250,0.68)"></div>
+          <div class="cal-swatch" style="background:rgba(107,140,250,0.25)"></div>
+          <div class="cal-swatch" style="background:rgba(107,140,250,0.55)"></div>
           <div class="cal-swatch" style="background:var(--blue)"></div>
-          <span class="cal-legend-text">More</span>
+          <span class="cal-legend-text" style="margin-left:10px">Scheduled</span>
+          <div class="cal-swatch" style="background:rgba(167,139,250,0.25)"></div>
+          <div class="cal-swatch" style="background:rgba(167,139,250,0.55)"></div>
+          <div class="cal-swatch" style="background:var(--purple)"></div>
         </div>
       </div>
     </div>

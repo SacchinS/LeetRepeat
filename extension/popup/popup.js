@@ -263,13 +263,21 @@ function getWeakAreas(problems) {
 }
 
 function buildCalData(problems) {
-  const cal = {};
+  const past   = {};  // date → completed count  (from solve history)
+  const future = {};  // date → scheduled count  (from nextDue)
+
   for (const p of Object.values(problems)) {
+    // Past: every rated history entry
     for (const h of (p.history || [])) {
-      if (h.date) cal[h.date] = (cal[h.date] || 0) + 1;
+      if (h.date) past[h.date] = (past[h.date] || 0) + 1;
+    }
+    // Future: upcoming scheduled reviews
+    if (p.nextDue && p.status === 'review') {
+      future[p.nextDue] = (future[p.nextDue] || 0) + 1;
     }
   }
-  return cal;
+
+  return { past, future };
 }
 
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
@@ -495,27 +503,28 @@ function makeCard(slug, kind, isDone, problems, todayStr) {
 // ─── Calendar tab ─────────────────────────────────────────────────────────────
 
 function renderCalendar() {
-  const calData = buildCalData(S.problems);
+  const { past: pastCal, future: futureCal } = buildCalData(S.problems);
   const todayStr  = today();
   const todayDate = new Date(todayStr + 'T00:00:00Z');
 
-  // Start from the Sunday 52 full weeks ago
-  const start = new Date(todayDate);
-  start.setUTCDate(start.getUTCDate() - 52 * 7);
-  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+  // Grid: 48 weeks of history + 6 weeks of future = 54 total
+  const PAST_WEEKS   = 48;
+  const FUTURE_WEEKS = 6;
+  const WEEKS        = PAST_WEEKS + FUTURE_WEEKS;
+  const STRIDE       = 13.5; // px per week column (11px cell + 2.5px gap)
+  const MONTHS       = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // Each week column: 11px cell + 2.5px gap ≈ 13.5px stride
-  const STRIDE = 13.5; // px per week column
-  const WEEKS  = 53;
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Start from the Sunday PAST_WEEKS full weeks ago
+  const start = new Date(todayDate);
+  start.setUTCDate(start.getUTCDate() - PAST_WEEKS * 7);
+  start.setUTCDate(start.getUTCDate() - start.getUTCDay()); // back to Sunday
 
   // ── Month labels (absolute-positioned, no overlap) ──────────────────────
   const monthsEl = $('cal-months');
   monthsEl.innerHTML = '';
-  // Total width = 53 columns × stride
   monthsEl.style.width = (WEEKS * STRIDE) + 'px';
 
-  let lastLabelWeek = -4; // minimum gap of 4 weeks between labels
+  let lastLabelWeek = -4;
   let lastMonth = -1;
   const cur = new Date(start);
 
@@ -525,7 +534,7 @@ function renderCalendar() {
       const lbl = document.createElement('span');
       lbl.className = 'cal-month-label';
       lbl.textContent = MONTHS[m];
-      lbl.style.left = (w * STRIDE) + 'px';
+      lbl.style.left  = (w * STRIDE) + 'px';
       monthsEl.appendChild(lbl);
       lastMonth     = m;
       lastLabelWeek = w;
@@ -536,38 +545,64 @@ function renderCalendar() {
   // ── Grid cells ───────────────────────────────────────────────────────────
   const grid = $('cal-grid');
   grid.innerHTML = '';
-  const maxCount = Math.max(1, ...Object.values(calData));
+  grid.style.gridTemplateColumns = `repeat(${WEEKS}, 11px)`;
+
+  const maxPast   = Math.max(1, ...Object.values(pastCal));
+  const maxFuture = Math.max(1, ...Object.values(futureCal));
 
   const cur2 = new Date(start);
   for (let w = 0; w < WEEKS; w++) {
     for (let d = 0; d < 7; d++) {
-      const dateStr = cur2.toISOString().split('T')[0];
-      const count   = calData[dateStr] || 0;
-      const future  = dateStr > todayStr;
+      const dateStr  = cur2.toISOString().split('T')[0];
+      const isFuture = dateStr > todayStr;
+      const isToday  = dateStr === todayStr;
 
       const cell = document.createElement('div');
       cell.className = 'cal-cell';
-      if (dateStr === todayStr) cell.classList.add('cal-today');
-      if (!future && count > 0) {
-        cell.setAttribute('data-level', Math.min(4, Math.ceil((count / maxCount) * 4)));
-      }
-      if (future) cell.style.opacity = '0.12';
-      cell.title = `${dateStr}  ·  ${count} solve${count !== 1 ? 's' : ''}`;
-      grid.appendChild(cell);
+      if (isToday) cell.classList.add('cal-today');
 
+      if (!isFuture) {
+        // Past / today: blue heat from solve history
+        const count = pastCal[dateStr] || 0;
+        if (count > 0) {
+          cell.setAttribute('data-level', Math.min(4, Math.ceil((count / maxPast) * 4)));
+        }
+        cell.title = `${dateStr}  ·  ${count} solve${count !== 1 ? 's' : ''}`;
+      } else {
+        // Future: purple heat from scheduled nextDue counts
+        const count = futureCal[dateStr] || 0;
+        if (count > 0) {
+          cell.setAttribute('data-sched', Math.min(4, Math.ceil((count / maxFuture) * 4)));
+          cell.title = `${dateStr}  ·  ${count} review${count !== 1 ? 's' : ''} scheduled`;
+        } else {
+          cell.style.opacity = '0.25';
+          cell.title = dateStr;
+        }
+      }
+
+      grid.appendChild(cell);
       cur2.setUTCDate(cur2.getUTCDate() + 1);
     }
   }
 
-  // ── Summary stats ────────────────────────────────────────────────────────
-  const counts     = Object.values(calData);
-  const totalSolves = counts.reduce((a, b) => a + b, 0);
-  const activeDays  = counts.length;
-  const bestDay     = Math.max(0, ...counts);
+  // ── Scroll to show today near the right edge (leaving future weeks visible)
+  const calWrapper = document.querySelector('.cal-wrapper');
+  if (calWrapper) {
+    // today is at week PAST_WEEKS, which is PAST_WEEKS*STRIDE px from left
+    const todayPx = PAST_WEEKS * STRIDE;
+    // Scroll so today is about 80% of the way across the visible area
+    calWrapper.scrollLeft = Math.max(0, todayPx - calWrapper.clientWidth * 0.80);
+  }
+
+  // ── Summary stats (past only) ─────────────────────────────────────────────
+  const pastCounts  = Object.values(pastCal);
+  const totalSolves = pastCounts.reduce((a, b) => a + b, 0);
+  const activeDays  = pastCounts.length;
+  const bestDay     = Math.max(0, ...pastCounts);
 
   let streak = 0;
   const d = new Date(todayDate);
-  while (calData[d.toISOString().split('T')[0]]) {
+  while (pastCal[d.toISOString().split('T')[0]]) {
     streak++;
     d.setUTCDate(d.getUTCDate() - 1);
   }
